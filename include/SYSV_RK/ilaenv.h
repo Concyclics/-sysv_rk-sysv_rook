@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../kml/kml_service.h"
+#include <kml_service.h>
 
 /**
  * ////////////////////////////////_FuncTest///////////////////////////////////////
@@ -29,12 +29,3 @@ int ilaenv(const int* ispec,
            const int* n2,
            const int* n3,
            const int* n4);
-
-/* union-find set */
-void init_UFset(int* UFset, int n);
-
-int find_UFset(int* UFset, int x);
-
-void union_UFset(int* UFset, int x, int y);
-
-int check_block_nums(int* UFset, int n);

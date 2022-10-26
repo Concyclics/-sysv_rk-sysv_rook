@@ -2,35 +2,33 @@
 set -e
 
 #export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
-
+selectFlag="-ftrapv -fstack-protector-all"
+flags=" -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -O2 $selectFlag"
 cd test/perf_test_ROOK
-gfortran *.c *.f -o perf_test_ROOK_SINGLE.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D SINGLE -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_ROOK_DOUBLE.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D DOUBLE -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_ROOK_COMPLEX.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D COMPLEX -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_ROOK_COMPLEX16.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D COMPLEX16 -ftrapv -fstack-protector-all
+for DFlag in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+gfortran *.c *.f -o perf_test_ROOK_$DFlag.o $flags -D $DFlag
+done
 
 cd ../perf_test_RK
-gfortran *.c *.f -o perf_test_RK_SINGLE.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D SINGLE -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_RK_DOUBLE.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D DOUBLE -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_RK_COMPLEX.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D COMPLEX -ftrapv -fstack-protector-all
-gfortran *.c *.f -o perf_test_RK_COMPLEX16.o -fopenmp -L ../.. -lSYSV -lkblas -llapack -lkservice -Ofast -D COMPLEX16 -ftrapv -fstack-protector-all
+for DFlag in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+gfortran *.c *.f -o perf_test_RK_$DFlag.o $flags -D $DFlag
+done
 
+selectFlag="-ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs"
+flags1="-fopenmp -llapack -lblas -lkservice -O2"
+flags2="-fopenmp -L ../.. -lSYSV -llapack -lkblas -lblas -lkservice -O2"
 cd ../func_test_RK
-gfortran *.c *.f -o generate_func_test_RK_SINGLE.o -fopenmp -llapack -lblas -lkblas -lkservice -Ofast -D SINGLE -D GENERATE_DATA
-gfortran *.c *.f -o func_test_RK_SINGLE.o -fopenmp -L ../.. -lSYSV -llapack -lblas -lkblas -lkservice -Ofast -D SINGLE -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_RK_DOUBLE.o -fopenmp -L ../.. -llapack -lblas -lkblas -lkservice -Ofast -D DOUBLE -D GENERATE_DATA
-gfortran *.c *.f -o func_test_RK_DOUBLE.o -fopenmp -L ../.. -lSYSV -llapack -lblas -lkblas -lkservice -Ofast -D DOUBLE -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_RK_COMPLEX.o -fopenmp -L ../.. -llapack -lblas -lkblas -lkservice -Ofast -D COMPLEX -D GENERATE_DATA
-gfortran *.c *.f -o func_test_RK_COMPLEX.o -fopenmp -L ../.. -lSYSV -llapack -lblas -lkblas -lkservice -Ofast -D COMPLEX -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_RK_COMPLEX16.o -fopenmp -L ../.. -llapack -lblas -lkblas -lkservice -Ofast -D COMPLEX16 -D GENERATE_DATA
-gfortran *.c *.f -o func_test_RK_COMPLEX16.o -fopenmp -L ../.. -lSYSV -llapack -lblas -lkblas -lkservice -Ofast -D COMPLEX16 -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
+for DFlag in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do 
+gfortran *.c *.f -o generate_func_test_RK_$DFlag.o $flags1 -D GENERATE_DATA -D $DFlag
+gfortran *.c *.f -o func_test_RK_$DFlag.o $flags2 -D $DFlag
+done
 
 cd ../func_test_ROOK
-gfortran *.c *.f -o generate_func_test_ROOK_SINGLE.o -fopenmp -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D SINGLE -D GENERATE_DATA
-gfortran *.c *.f -o func_test_ROOK_SINGLE.o -fopenmp -L ../.. -lSYSV -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D SINGLE -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_ROOK_DOUBLE.o -fopenmp -L ../.. -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D DOUBLE -D GENERATE_DATA
-gfortran *.c *.f -o func_test_ROOK_DOUBLE.o -fopenmp -L ../.. -lSYSV -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D DOUBLE -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_ROOK_COMPLEX.o -fopenmp -L ../.. -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D COMPLEX -D GENERATE_DATA
-gfortran *.c *.f -o func_test_ROOK_COMPLEX.o -fopenmp -L ../.. -lSYSV -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D COMPLEX -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
-gfortran *.c *.f -o generate_func_test_ROOK_COMPLEX16.o -fopenmp -L ../.. -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D COMPLEX16 -D GENERATE_DATA
-gfortran *.c *.f -o func_test_ROOK_COMPLEX16.o -fopenmp -L ../.. -lSYSV -llapack -lcblas -lblas -lkblas -lkservice -Ofast -D COMPLEX16 -ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs
+for DFlag in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do 
+gfortran *.c *.f -o generate_func_test_ROOK_$DFlag.o $flags1 -D GENERATE_DATA -D $DFlag
+gfortran *.c *.f -o func_test_ROOK_$DFlag.o $flags2 -D $DFlag
+done

@@ -6,8 +6,8 @@
  *******************************************************************************/
 
 #pragma once
+#include <kml_service.h>
 #include <omp.h>
-#include "../kml/kml_service.h"
 
 #define MAX(x, y) KmlMax(x, y)
 #define MIN(x, y) KmlMin(x, y)
@@ -20,8 +20,6 @@
 #define EIGHT 8.0
 #define SEVTEN 17.0
 #define T_ONE ONE
-#define P_ONE ONE
-#define P_NEG_ONE -ONE
 #define ABS_ fabs
 #define lamch_ Slamch
 #define SYTRF_RK ssytrf_rk_
@@ -38,8 +36,6 @@
 #define EIGHT 8.0
 #define SEVTEN 17.0
 #define T_ONE ONE
-#define P_ONE ONE
-#define P_NEG_ONE -ONE
 #define ABS_ fabs
 #define lamch_ Dlamch
 #define SYTRF_RK dsytrf_rk_
@@ -49,15 +45,13 @@
 #define SYSV_RK dsysv_rk_
 #endif
 #ifdef COMPLEX
-typedef float dataAccu;
-typedef kml_complex_float dataType;
+#define dataAccu float
+#define dataType kml_complex_float
 #define ZERO 0.0
 #define ONE 1.0
 #define EIGHT 8.0
 #define SEVTEN 17.0
 #define T_ONE CONE
-#define P_ONE &CONE
-#define P_NEG_ONE &NEG_CONE
 #define ABS_ CABS
 #define CABS(Z) (fabs(creal(Z)) + fabs(cimag(Z)))
 #define lamch_ Slamch
@@ -68,15 +62,13 @@ typedef kml_complex_float dataType;
 #define SYSV_RK csysv_rk_
 #endif
 #ifdef COMPLEX16
-typedef double dataAccu;
-typedef kml_complex_double dataType;
+#define dataAccu double
+#define dataType kml_complex_double
 #define ZERO 0.0
 #define ONE 1.0
 #define EIGHT 8.0
 #define SEVTEN 17.0
 #define T_ONE CONE
-#define P_ONE &CONE
-#define P_NEG_ONE &NEG_CONE
 #define ABS_ CABS
 #define CABS(Z) (fabs(creal(Z)) + fabs(cimag(Z)))
 #define lamch_ Dlamch
@@ -88,8 +80,8 @@ typedef kml_complex_double dataType;
 #endif
 
 #ifdef SINGLE
-typedef float blasDataAccu;
-typedef float blasDataType;
+#define blasDataAccu float
+#define blasDataType float
 #define blasParamType float
 #define I_AMAX isamax_
 #define COPY_ scopy_
@@ -103,8 +95,8 @@ typedef float blasDataType;
 #endif
 
 #ifdef DOUBLE
-typedef double blasDataAccu;
-typedef double blasDataType;
+#define blasDataAccu double
+#define blasDataType double
 #define blasParamType double
 #define I_AMAX idamax_
 #define COPY_ dcopy_
@@ -118,8 +110,8 @@ typedef double blasDataType;
 #endif
 
 #ifdef COMPLEX
-typedef float blasDataAccu;
-typedef kml_complex_float blasDataType;
+#define blasDataAccu float
+#define blasDataType kml_complex_float
 #define blasParamType void*
 #define I_AMAX icamax_
 #define COPY_ ccopy_
@@ -133,8 +125,8 @@ typedef kml_complex_float blasDataType;
 #endif
 
 #ifdef COMPLEX16
-typedef double blasDataAccu;
-typedef kml_complex_double blasDataType;
+#define blasDataAccu double
+#define blasDataType kml_complex_double
 #define blasParamType void*
 #define I_AMAX izamax_
 #define COPY_ zcopy_
@@ -152,80 +144,80 @@ int I_AMAX(const int* N, blasDataType* x, const int* incX);
 
 // COPY
 void COPY_(const int* n,
-               const blasDataType* x,
-               const int* incX,
-               blasDataType* y,
-               const int* incY);
+           const blasDataType* x,
+           const int* incX,
+           blasDataType* y,
+           const int* incY);
 
 // SCAL
 void SCAL_(const int* N,
-               const blasDataType* alpha,
-               blasDataType* X,
-               const int* incX);
+           const blasDataType* alpha,
+           blasDataType* X,
+           const int* incX);
 
 // SWAP
 void SWAP_(const int* n,
-               blasDataType* x,
-               const int* incX,
-               blasDataType* y,
-               const int* incY);
+           blasDataType* x,
+           const int* incX,
+           blasDataType* y,
+           const int* incY);
 
 // SYR
 void SYR_(const char* Uplo,
-              const int* N,
-              const blasDataType* alpha,
-              const blasDataType* X,
-              const int* incX,
-              blasDataType* A,
-              const int* lda);
+          const int* N,
+          const blasDataType* alpha,
+          const blasDataType* X,
+          const int* incX,
+          blasDataType* A,
+          const int* lda);
 
 // GER
 void GER_(const int* M,
-              const int* N,
-              const blasDataType* alpha,
-              const blasDataType* X,
-              const int* incX,
-              const blasDataType* Y,
-              const int* incY,
-              blasDataType* A,
-              const int* lda);
+          const int* N,
+          const blasDataType* alpha,
+          const blasDataType* X,
+          const int* incX,
+          const blasDataType* Y,
+          const int* incY,
+          blasDataType* A,
+          const int* lda);
 
 // GEMV
 void GEMV_(const char* trans,
-               const int* m,
-               const int* n,
-               const blasDataType* alpha,
-               const blasDataType* a,
-               const int* lda,
-               const blasDataType* x,
-               const int* incX,
-               const blasDataType* beta,
-               blasDataType* y,
-               const int* incY);
+           const int* m,
+           const int* n,
+           const blasDataType* alpha,
+           const blasDataType* a,
+           const int* lda,
+           const blasDataType* x,
+           const int* incX,
+           const blasDataType* beta,
+           blasDataType* y,
+           const int* incY);
 
 // GEMM
 void GEMM_(const char* TransA,
-               const char* TransB,
-               const int* M,
-               const int* N,
-               const int* K,
-               const blasDataType* alpha,
-               const blasDataType* A,
-               const int* lda,
-               const blasDataType* B,
-               const int* ldb,
-               const blasDataType* beta,
-               blasDataType* C,
-               const int* ldc);
+           const char* TransB,
+           const int* M,
+           const int* N,
+           const int* K,
+           const blasDataType* alpha,
+           const blasDataType* A,
+           const int* lda,
+           const blasDataType* B,
+           const int* ldb,
+           const blasDataType* beta,
+           blasDataType* C,
+           const int* ldc);
 // TRSM
 void TRSM_(const char* Side,
-               const char* Uplo,
-               const char* TransA,
-               const char* Diag,
-               const int* M,
-               const int* N,
-               const blasDataType* alpha,
-               const blasDataType* A,
-               const int* lda,
-               blasDataType* B,
-               const int* ldb);
+           const char* Uplo,
+           const char* TransA,
+           const char* Diag,
+           const int* M,
+           const int* N,
+           const blasDataType* alpha,
+           const blasDataType* A,
+           const int* lda,
+           blasDataType* B,
+           const int* ldb);

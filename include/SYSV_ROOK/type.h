@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <kml_service.h>
 #include <omp.h>
-#include "../kml/kml_service.h"
 
 #define MAX(x, y) KmlMax(x, y)
 #define MIN(x, y) KmlMin(x, y)
@@ -159,80 +159,80 @@ int I_AMAX(const int* N, blasDataType* x, const int* incX);
 
 // COPY
 void COPY_(const int* n,
-               const blasDataType* x,
-               const int* incX,
-               blasDataType* y,
-               const int* incY);
+           const blasDataType* x,
+           const int* incX,
+           blasDataType* y,
+           const int* incY);
 
 // SCAL
 void SCAL_(const int* N,
-               const blasDataType* alpha,
-               blasDataType* X,
-               const int* incX);
+           const blasDataType* alpha,
+           blasDataType* X,
+           const int* incX);
 
 // SWAP
 void SWAP_(const int* n,
-               blasDataType* x,
-               const int* incX,
-               blasDataType* y,
-               const int* incY);
+           blasDataType* x,
+           const int* incX,
+           blasDataType* y,
+           const int* incY);
 
 // SYR
 void SYR_(const char* Uplo,
-              const int* N,
-              const blasDataType* alpha,
-              const blasDataType* X,
-              const int* incX,
-              blasDataType* A,
-              const int* lda);
+          const int* N,
+          const blasDataType* alpha,
+          const blasDataType* X,
+          const int* incX,
+          blasDataType* A,
+          const int* lda);
 
 // GER
 void GER_(const int* M,
-              const int* N,
-              const blasDataType* alpha,
-              const blasDataType* X,
-              const int* incX,
-              const blasDataType* Y,
-              const int* incY,
-              blasDataType* A,
-              const int* lda);
+          const int* N,
+          const blasDataType* alpha,
+          const blasDataType* X,
+          const int* incX,
+          const blasDataType* Y,
+          const int* incY,
+          blasDataType* A,
+          const int* lda);
 
 // GEMV
 void GEMV_(const char* trans,
-               const int* m,
-               const int* n,
-               const blasDataType* alpha,
-               const blasDataType* a,
-               const int* lda,
-               const blasDataType* x,
-               const int* incX,
-               const blasDataType* beta,
-               blasDataType* y,
-               const int* incY);
+           const int* m,
+           const int* n,
+           const blasDataType* alpha,
+           const blasDataType* a,
+           const int* lda,
+           const blasDataType* x,
+           const int* incX,
+           const blasDataType* beta,
+           blasDataType* y,
+           const int* incY);
 
 // GEMM
 void GEMM_(const char* TransA,
-               const char* TransB,
-               const int* M,
-               const int* N,
-               const int* K,
-               const blasDataType* alpha,
-               const blasDataType* A,
-               const int* lda,
-               const blasDataType* B,
-               const int* ldb,
-               const blasDataType* beta,
-               blasDataType* C,
-               const int* ldc);
+           const char* TransB,
+           const int* M,
+           const int* N,
+           const int* K,
+           const blasDataType* alpha,
+           const blasDataType* A,
+           const int* lda,
+           const blasDataType* B,
+           const int* ldb,
+           const blasDataType* beta,
+           blasDataType* C,
+           const int* ldc);
 // TRSM
 void TRSM_(const char* Side,
-               const char* Uplo,
-               const char* TransA,
-               const char* Diag,
-               const int* M,
-               const int* N,
-               const blasDataType* alpha,
-               const blasDataType* A,
-               const int* lda,
-               blasDataType* B,
-               const int* ldb);
+           const char* Uplo,
+           const char* TransA,
+           const char* Diag,
+           const int* M,
+           const int* N,
+           const blasDataType* alpha,
+           const blasDataType* A,
+           const int* lda,
+           blasDataType* B,
+           const int* ldb);

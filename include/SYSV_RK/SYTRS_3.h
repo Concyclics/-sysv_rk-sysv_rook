@@ -8,11 +8,11 @@
 #pragma once
 
 #include <complex.h>
+#include <kblas.h>
+#include <kml_service.h>
 #include <math.h>
-#include "../kml/kblas.h"
-#include "../kml/kml_service.h"
-#include "type.h"
 #include "ilaenv.h"
+#include "type.h"
 
 /**
  * ////////////////////////////////SYTRS_3///////////////////////////////////////

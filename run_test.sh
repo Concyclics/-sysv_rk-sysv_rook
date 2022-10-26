@@ -7,15 +7,39 @@ bash build_test.sh
 
 #export ASAN_OPTIONS=halt_on_error=0;log_path=/tmp/asan.log;detect_leaks=1
 
-#export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
+#export LD_PRELOAD=/usr/lib/gcc/aarch68-linux-gnu/10.3.1/libasan.so
 
-export OMP_NUM_THREADS=32
-#./test/func_test_RK/generate_func_test_RK_SINGLE.o S 232 232 U
-#./test/func_test_RK/func_test_RK_SINGLE.o S 232 232 U
-./test/func_test_RK/generate_func_test_RK_DOUBLE.o S 232 232 U
-./test/func_test_RK/func_test_RK_DOUBLE.o S 232 232 U
-./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
-./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 L
+export OMP_NUM_THREADS=1
+#./test/func_test_RK/generate_func_test_RK_SINGLE.o S 10 10 U
+#./test/func_test_RK/func_test_RK_SINGLE.o S 10 10 U
+#./test/func_test_RK/generate_func_test_RK_DOUBLE.o S 10 10 U
+#./test/func_test_RK/func_test_RK_DOUBLE.o S 10 10 U
+echo RK U
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+./test/func_test_RK/generate_func_test_RK_$type.o S 10 10 U
+./test/func_test_RK/func_test_RK_$type.o S 10 10 U
+done
+echo ROOK U
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 10 10 U
+./test/func_test_ROOK/func_test_ROOK_$type.o S 10 10 U
+done
+echo RK L
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+./test/func_test_RK/generate_func_test_RK_$type.o S 10 10 L
+./test/func_test_RK/func_test_RK_$type.o S 10 10 L
+done
+echo ROOK L
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 10 10 L
+./test/func_test_ROOK/func_test_ROOK_$type.o S 10 10 L
+done
+#./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
+#./test/perf_test_ROOK/perf_test_ROOK_COMPLEX.o 300 300 L
 #./test/perf_test_RK/perf_test_RK_SINGLE.o 5000 5000 L
 #./test/perf_test_RK/perf_test_RK_SINGLE.o  L
 #./run_func_test.sh

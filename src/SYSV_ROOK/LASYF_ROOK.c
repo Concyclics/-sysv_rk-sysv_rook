@@ -108,34 +108,26 @@ void LASYF_ROOK(const char* uplo,
                         element in row IMAX, and ROWMAX is its absolute value.
                         Determine both ROWMAX and JMAX.
                         */
-                        /*
-                         if (iMax != k) {
-                             intTmp = k - iMax;
-                             jMax = iMax + I_AMAX(&intTmp,
-                                                  w + iMax + (kw - 2) * LDW,
-                         &intOne); rowMax = ABS_(w[jMax - 1 + (kw - 2) * LDW]);
-                         } else {
-                             rowMax = ZERO;
-                         }
 
-                         if (iMax > 1) {
-                             intTmp = iMax - 1;
-                             iTemp = I_AMAX(&intTmp, w + (kw - 2) * LDW,
-                         &intOne); sTemp = ABS_(w[iTemp - 1 + (kw - 2) * LDW]);
-                             if (sTemp > rowMax) {
-                                 rowMax = sTemp;
-                                 jMax = iTemp;
-                             }
-                         }*/
-                        if (iMax == k) {
-                            rowMax = ZERO;
-                        } else {
-                            sTemp = w[iMax - 1 + (kw - 2) * LDW];
-                            w[iMax - 1 + (kw - 2) * LDW] = 0;
-                            intTmp = k;
-                            jMax = I_AMAX(&intTmp, w + (kw - 2) * LDW, &intOne);
+                        if (iMax != k) {
+                            intTmp = k - iMax;
+                            jMax = iMax + I_AMAX(&intTmp,
+                                                 w + iMax + (kw - 2) * LDW,
+                                                 &intOne);
                             rowMax = ABS_(w[jMax - 1 + (kw - 2) * LDW]);
-                            w[iMax - 1 + (kw - 2) * LDW] = sTemp;
+                        } else {
+                            rowMax = ZERO;
+                        }
+
+                        if (iMax > 1) {
+                            intTmp = iMax - 1;
+                            iTemp =
+                                I_AMAX(&intTmp, w + (kw - 2) * LDW, &intOne);
+                            sTemp = ABS_(w[iTemp - 1 + (kw - 2) * LDW]);
+                            if (sTemp > rowMax) {
+                                rowMax = sTemp;
+                                jMax = iTemp;
+                            }
                         }
                         /*
                         Equivalent to testing for ABS( w( IMAX, KW-1 )
@@ -361,7 +353,8 @@ computing blocks of NB columns at a time
                 intTmp = N - k + 1;
                 Tmp2 = k - 1;
                 GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + k - 1, &LDA,
-                      w + k - 1, &LDW, &CONE, w + k - 1 + (k - 1) * LDW, &LDW);
+                      w + k - 1, &LDW, &CONE, w + k - 1 + (k - 1) * LDW,
+                      &intOne);
             }
             /*
             Determine rows and columns to be interchanged and whether
@@ -422,34 +415,26 @@ computing blocks of NB columns at a time
                         JMAX is the column-index of the largest off-diagonal
                         element in row IMAX, and ROWMAX is its absolute value.
                         */
-                        /*
-                         if (iMax != k) {
-                             intTmp = iMax - k;
-                             jMax = k - 1 +
-                                    I_AMAX(&intTmp, w + k - 1 + k * LDW,
-                         &intOne); rowMax = ABS_(w[jMax - 1 + k * LDW]); } else
-                         { rowMax = ZERO;
-                         }
 
-                         if (iMax < N) {
-                             intTmp = N - iMax;
-                             iTemp =
-                                 iMax + I_AMAX(&intTmp, w + iMax + k * LDW,
-                         &intOne); sTemp = ABS_(w[iTemp - 1 + k * LDW]); if
-                         (sTemp > rowMax) { rowMax = sTemp; jMax = iTemp;
-                             }
-                         }*/
-                        if (iMax == k) {
-                            rowMax = ZERO;
-                        } else {
-                            sTemp = w[iMax - 1 + k * LDW];
-                            w[iMax - 1 + k * LDW] = 0;
-                            intTmp = N - k + 1;
+                        if (iMax != k) {
+                            intTmp = iMax - k;
                             jMax =
                                 k - 1 +
                                 I_AMAX(&intTmp, w + k - 1 + k * LDW, &intOne);
                             rowMax = ABS_(w[jMax - 1 + k * LDW]);
-                            w[iMax - 1 + k * LDW] = sTemp;
+                        } else {
+                            rowMax = ZERO;
+                        }
+
+                        if (iMax < N) {
+                            intTmp = N - iMax;
+                            iTemp = iMax + I_AMAX(&intTmp, w + iMax + k * LDW,
+                                                  &intOne);
+                            sTemp = ABS_(w[iTemp - 1 + k * LDW]);
+                            if (sTemp > rowMax) {
+                                rowMax = sTemp;
+                                jMax = iTemp;
+                            }
                         }
                         /*
                         Equivalent to testing for ABS( w( IMAX, K+1 )

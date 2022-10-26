@@ -83,7 +83,6 @@ void SYTRF_RK(const char* uplo,
             nb = MAX(LWORK / ldwork, 1);
             nbmin =
                 MAX(2, ilaenv(&two2, name, "RK", n, &_one_1, &_one_1, &_one_1));
-            nbmin = 8;
         }
     } else {
         iws = 1;

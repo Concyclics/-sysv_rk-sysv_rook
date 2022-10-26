@@ -7,9 +7,9 @@
 #pragma once
 
 #include <complex.h>
+#include <kblas.h>
+#include <kml_service.h>
 #include <math.h>
-#include "../kml/kblas.h"
-#include "../kml/kml_service.h"
 #include "LASYF_RK.h"
 #include "SYTF2_RK.h"
 #include "ilaenv.h"

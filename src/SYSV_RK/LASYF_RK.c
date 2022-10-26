@@ -115,18 +115,37 @@ void LASYF_RK(const char* uplo,
                         its absolute value. Determine both ROWMAX and
                         JMAX.
                         */
-
-                        if (iMax == k) {
-                            rowMax = ZERO;
-                        } else {
-                            sTemp = w[iMax - 1 + (kw - 2) * LDW];
-                            w[iMax - 1 + (kw - 2) * LDW] = 0;
-                            intTmp = k;
-                            jMax = I_AMAX(&intTmp, w + (kw - 2) * LDW, &intOne);
+                        if (iMax != k) {
+                            intTmp = k - iMax;
+                            jMax = iMax + I_AMAX(&intTmp,
+                                                 w + iMax + (kw - 2) * LDW,
+                                                 &intOne);
                             rowMax = ABS_(w[jMax - 1 + (kw - 2) * LDW]);
-                            w[iMax - 1 + (kw - 2) * LDW] = sTemp;
+                        } else {
+                            rowMax = ZERO;
                         }
 
+                        if (iMax > 1) {
+                            intTmp = iMax - 1;
+                            iTemp =
+                                I_AMAX(&intTmp, w + (kw - 2) * LDW, &intOne);
+                            sTemp = ABS_(w[iTemp - 1 + (kw - 2) * LDW]);
+                            if (sTemp > rowMax) {
+                                rowMax = sTemp;
+                                jMax = iTemp;
+                            }
+                        }
+                        /*
+                                                if (iMax == k) {
+                                                    rowMax = ZERO;
+                                                } else {
+                                                    sTemp = w[iMax - 1 + (kw -
+                           2) * LDW]; w[iMax - 1 + (kw - 2) * LDW] = 0; intTmp =
+                           k; jMax = I_AMAX(&intTmp, w + (kw - 2) * LDW,
+                           &intOne); rowMax = ABS_(w[jMax - 1 + (kw - 2) *
+                           LDW]); w[iMax - 1 + (kw - 2) * LDW] = sTemp;
+                                                }
+                        */
                         /*
                         Equivalent to testing for ABS( w( IMAX, KW-1 )
                         ).GE.ALPHA*ROWMAX (used to handle NaN and Inf)
@@ -403,39 +422,40 @@ computing blocks of NB columns at a time
                         element in row IMAX, and ROWMAX is its absolute
                         value.
                         */
-                        /*
-                         if (iMax != k) {
-                             intTmp = iMax - k;
-                             jMax =
-                                 k - 1 +
-                                 I_AMAX(&intTmp, w + k - 1 + k * LDW, &intOne);
-                             rowMax = ABS_(w[jMax - 1 + k * LDW]);
-                         } else {
-                             rowMax = ZERO;
-                         }
 
-                         if (iMax < N) {
-                             intTmp = N - iMax;
-                             iTemp = iMax + I_AMAX(&intTmp, w + iMax + k * LDW,
-                                                   &intOne);
-                             sTemp = ABS_(w[iTemp - 1 + k * LDW]);
-                             if (sTemp > rowMax) {
-                                 rowMax = sTemp;
-                                 jMax = iTemp;
-                             }
-                         }*/
-                        if (iMax == k) {
-                            rowMax = ZERO;
-                        } else {
-                            sTemp = w[iMax - 1 + k * LDW];
-                            w[iMax - 1 + k * LDW] = 0;
-                            intTmp = N - k + 1;
+                        if (iMax != k) {
+                            intTmp = iMax - k;
                             jMax =
                                 k - 1 +
                                 I_AMAX(&intTmp, w + k - 1 + k * LDW, &intOne);
                             rowMax = ABS_(w[jMax - 1 + k * LDW]);
-                            w[iMax - 1 + k * LDW] = sTemp;
+                        } else {
+                            rowMax = ZERO;
                         }
+
+                        if (iMax < N) {
+                            intTmp = N - iMax;
+                            iTemp = iMax + I_AMAX(&intTmp, w + iMax + k * LDW,
+                                                  &intOne);
+                            sTemp = ABS_(w[iTemp - 1 + k * LDW]);
+                            if (sTemp > rowMax) {
+                                rowMax = sTemp;
+                                jMax = iTemp;
+                            }
+                        }
+                        /*
+                       if (iMax == k) {
+                           rowMax = ZERO;
+                       } else {
+                           sTemp = w[iMax - 1 + k * LDW];
+                           w[iMax - 1 + k * LDW] = 0;
+                           intTmp = N - k + 1;
+                           jMax =
+                               k - 1 +
+                               I_AMAX(&intTmp, w + k - 1 + k * LDW, &intOne);
+                           rowMax = ABS_(w[jMax - 1 + k * LDW]);
+                           w[iMax - 1 + k * LDW] = sTemp;
+                       }*/
                         /*
                         Equivalent to testing for ABS( w( IMAX, K+1 )
                         ).GE.ALPHA*ROWMAX (used to handle NaN and Inf)
