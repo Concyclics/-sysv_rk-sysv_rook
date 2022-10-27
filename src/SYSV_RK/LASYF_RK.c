@@ -444,19 +444,6 @@ computing blocks of NB columns at a time
                             }
                         }
                         /*
-                       if (iMax == k) {
-                           rowMax = ZERO;
-                       } else {
-                           sTemp = w[iMax - 1 + k * LDW];
-                           w[iMax - 1 + k * LDW] = 0;
-                           intTmp = N - k + 1;
-                           jMax =
-                               k - 1 +
-                               I_AMAX(&intTmp, w + k - 1 + k * LDW, &intOne);
-                           rowMax = ABS_(w[jMax - 1 + k * LDW]);
-                           w[iMax - 1 + k * LDW] = sTemp;
-                       }*/
-                        /*
                         Equivalent to testing for ABS( w( IMAX, K+1 )
                         ).GE.ALPHA*ROWMAX (used to handle NaN and Inf)
                         */

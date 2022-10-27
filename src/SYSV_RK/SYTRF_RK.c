@@ -93,66 +93,21 @@ void SYTRF_RK(const char* uplo,
     }
 
     if (upper) {
-        /*
-         *        Factorize A as U*D*U**T using the upper triangle of A
-         *
-         *        K is the main loop index, decreasing from N to 1 in steps of
-         *        KB, where KB is the number of columns factorized by SLASYF_RK;
-         *        KB is either NB or NB-1, or K for the last block
-         */
         k = N;
-        /*
-         *        If K < 1, exit from loop
-         */
         while (k > 0) {
             if (k > nb) {
-                /*
-                 *           Factorize columns k-kb+1:k of A and use blocked
-                 * code to update columns 1:k-kb
-                 */
-
                 BlasSetNumThreads(threads_use);
                 LASYF_RK(uplo, &k, &nb, &kb, A, lda, E, ipiv, work, &ldwork,
                          &iInfo);
             } else {
-                /*
-                 *           Use unblocked code to factorize columns 1:k of A
-                 */
                 BlasSetNumThreads(MIN(max_threads, 4));
                 SYTF2_RK(uplo, &k, A, lda, E, ipiv, &iInfo);
                 kb = k;
             }
-            /*
-             *        Set INFO on the first occurrence of a zero pivot
-             */
             if (info == 0 && iInfo > 0) {
                 *info = iInfo;
             }
-            /*
-             *        No need to adjust IPIV
-             *
-             *
-             *        Apply permutations to the leading panel 1:k-1
-             *
-             *        Read IPIV from the last block factored, i.e.
-             *        indices  k-kb+1:k and apply row permutations to the
-             *        last k+1 colunms k+1:N after that block
-             *        (We can do the simple loop over IPIV with decrement -1,
-             *        since the ABS value of IPIV( I ) represents the row index
-             *        of the interchange with row i in both 1x1 and 2x2 pivot
-             * cases)
-             */
             if (k < N) {
-//#pragma omp parallel for private(ip, intTmp)
-/*
-for (i = k; i >= k - kb + 1; i--) {
-    ip = ABS_(ipiv[i - 1]);
-    if (ip != i) {
-        intTmp = N - k;
-        SWAP_(&intTmp, A + (i - 1) + (k) * (LDA), &LDA,
-              A + (ip - 1) + (k) * (LDA), &LDA);
-    }
-}*/
 #pragma omp parallel for
                 for (i = 0; i < N; i++) {
                     swaped[i] = i;
@@ -191,48 +146,23 @@ for (i = k; i >= k - kb + 1; i--) {
                     }
                 }
             }
-            /*
-             *        Decrease K and return to the start of the main loop
-             */
             k -= kb;
         }
-        /*
-         *        This label is the exit from main loop over K decreasing
-         *        from N to 1 in steps of KB
-         */
     } else {
-        /*
-         *        Factorize A as L*D*L**T using the lower triangle of A
-         *
-         *        K is the main loop index, increasing from 1 to N in steps of
-         *        KB, where KB is the number of columns factorized by SLASYF_RK;
-         *        KB is either NB or NB-1, or N-K+1 for the last block
-         */
         k = 1;
         while (k <= N) {
             if (k <= N - nb) {
-                /*
-                 *           Factorize columns k:k+kb-1 of A and use blocked
-                 * code to update columns k+kb:n
-                 *
-                 */
                 BlasSetNumThreads(threads_use);
                 int param = N - k + 1;
                 LASYF_RK(uplo, &param, &nb, &kb, A + k - 1 + (k - 1) * (LDA),
                          lda, E + k - 1, ipiv + k - 1, work, &ldwork, &iInfo);
             } else {
-                /*
-                 *           Use unblocked code to factorize columns k:n of A
-                 */
                 BlasSetNumThreads(MIN(max_threads, 4));
                 int param = N - k + 1;
                 SYTF2_RK(uplo, &param, A + k - 1 + (k - 1) * (LDA), lda,
                          E + k - 1, ipiv + k - 1, &iInfo);
                 kb = N - k + 1;
             }
-            /*
-             *        Set INFO on the first occurrence of a zero pivot
-             */
             if (info == 0 && iInfo > 0) {
                 *info = iInfo + k - 1;
             }
@@ -247,26 +177,7 @@ for (i = k; i >= k - kb + 1; i--) {
                     ipiv[i - 1] += -k + 1;
                 }
             }
-            /*
-             *        Apply permutations to the leading panel 1:k-1
-             *
-             *        Read IPIV from the last block factored, i.e.
-             *        indices  k:k+kb-1 and apply row permutations to the
-             *        first k-1 colunms 1:k-1 before that block
-             *        (We can do the simple loop over IPIV with increment 1,
-             *        since the ABS value of IPIV( I ) represents the row index
-             *        of the interchange with row i in both 1x1 and 2x2 pivot
-             * cases)
-             */
             if (k > 1) {
-                /*
-                for (i = k; i <= k + kb - 1; i++) {
-                    ip = ABS_(ipiv[i - 1]);
-                    if (ip != i) {
-                        intTmp = k - 1;
-                        SWAP_(&intTmp, A + (i - 1), &LDA, A + (ip - 1), &LDA);
-                    }
-                }*/
                 for (i = 0; i < N; i++) {
                     swaped[i] = i;
                     visited[i] = 0;
@@ -304,19 +215,8 @@ for (i = k; i >= k - kb + 1; i--) {
                     }
                 }
             }
-            /*
-             *        Increase K and return to the start of the main loop
-             */
             k += kb;
         }
-        /*
-         *        This label is the exit from main loop over K increasing
-         *        from 1 to N in steps of KB
-         */
-
-        /*
-         *     End Lower
-         */
     }
     work[0] = (float)lwkopt;
     BlasSetNumThreads(max_threads);

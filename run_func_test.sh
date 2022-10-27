@@ -2,7 +2,7 @@ set -e
 
 export ASAN_OPTIONS=halt_on_error=0;log_path=/tmp/asan.log;detect_leaks=1
 
-export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
+#export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
 
 echo "Running functional tests"
 

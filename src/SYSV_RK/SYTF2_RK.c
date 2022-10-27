@@ -25,26 +25,6 @@ void SYTF2_RK(const char* uplo,
     const dataType CONE = 1;
     const dataType NEG_CONE = -1;
 #endif
-
-    /*
-     *
-     *  -- LAPACK computational routine --
-     *  -- LAPACK is a software package provided by Univ. of Tennessee,    --
-     *  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG
-     Ltd..--
-     *
-     *     .. Scalar Arguments ..
-           CHARACTER          UPLO
-           INTEGER            INFO, LDA, N
-     *     ..
-     *     .. Array Arguments ..
-           INTEGER            IPIV( * )
-           REAL               A( LDA, * ), E( * )
-     *     ..
-     *
-     *  =====================================================================
-     */
-
     int upper, done;
     int i, imax, j, jmax, itemp, k, kk, kp, kstep, p, ii;
     dataAccu absakk, colmax, rowmax, stemp, sfmin;
@@ -74,31 +54,11 @@ void SYTF2_RK(const char* uplo,
         return;
     }
 
-    /*
-     *    Initialize ALPHA for use in choosing pivot block size.
-     *
-     *    alpha = ( one+sqrt( sevten ) ) / eight
-     *
-     *    Compute machine safe minimum
-     */
-
     dataAccu ALPHA = (ONE + sqrt(SEVTEN)) / EIGHT;
 
     sfmin = lamch_("S");
     if (upper) {
-        /*
-         *    Factorize A as U*D*U**T using the upper triangle of A
-         *
-         *    Initialize the first entry of array E, where superdiagonal
-         *    elements of D are stored.
-         */
-
         E[0] = ZERO;
-
-        /*
-         * K is the main loop index, decreasing from N to 1 in steps of
-         *        1 or 2
-         */
 
         k = N;
 
@@ -149,31 +109,12 @@ void SYTF2_RK(const char* uplo,
                  */
 
                 if (absakk >= ALPHA * colmax) {
-                    // printf("absakk = %f, colmax = %f ALPHA = %f MAX(absakk,
-                    // colmax) = %f MAX(absakk, colmax) >= ALPHA * colmax = %f
-                    // == %d\n", absakk, colmax, ALPHA, MAX(absakk, colmax),
-                    // ALPHA * colmax, (MAX(absakk, colmax) >= ALPHA * colmax));
-                    /*
-                     *   no interchange,
-                     *   use 1-by-1 pivot block
-                     */
                     kp = k;
                 } else {
                     done = false;
                     // Loop until pivot found
 
                     while (!done) {
-                        // printf("loop2 k = %d\n", k);
-
-                        /*
-                         *   Begin pivot search loop body
-                         *
-                         *   JMAX is the column-index of the largest
-                         * off-diagonal element in row IMAX, and ROWMAX is
-                         * its absolute value. Determine both ROWMAX and
-                         * JMAX.
-                         */
-
                         if (imax != k) {
                             intTmp = k - imax;
                             jmax =

@@ -10,57 +10,64 @@
 1、在SYSV目录下，可以选择两种编译组合：
 
 (1)仅加入安全选项
-```bash
-build.sh 1
+```
+bash build.sh 1
 ```
 即可将源文件编译成libSYSV.a以及libSYSV.so两个库。
 
 (2)加入三个选项
-```bash
-build.sh 2
+```
+bash build.sh 2
 ```
 即可将源文件编译成libSYSV.a以及libSYSV.so两个库。
 
 
 2、在在SYSV目录下，使用命令
-```bash
-build_test.sh
+```
+bash build_test.sh
 ```
 即可将编译各个测试代码。
 ****
-## 功能测试使用说明（以RK下的SINGLE类型为例）
-在SYSV目录下，使用命令
-```bash
-run_func_test.sh
+## 功能测试使用说明
+### 完整功能测试（均在SYSV目录下使用）
+测试误差（输出中result_os为开源代码误差，result_us为开发代码误差）
 ```
-其中，若想单独测试某一功能，则使用命令：（以RK下的SINGLE类型为例）
-        
+bash run_func_test.sh
+```
 测试空指针
-```bash
-./test/func_test_RK/func_test_RK_SINGLE.o N
+```
+bash ./test/func_test_RK/func_test_RK_SINGLE.o N
 ```
 测试异常输入
-```bash
-./test/func_test_RK/func_test_RK_SINGLE.o E
 ```
-测试某一规模矩阵
-```bash
-./test/func_test_RK/generate_func_test_RK_SINGLE.o S N NRHS UPLO
-./test/func_test_RK/func_test_RK_SINGLE.o S N NRHS UPLO
+bash ./test/func_test_RK/func_test_RK_SINGLE.o E
 ```
-
-        
+### 单独测试某一规模
+若想单独测试某一功能，则使用命令：
+```
+bash run_func_test_spec.sh type func N NRHS UPLO
+```
+以RK函数的SINGLE类型，N=100，NRHS=50，UPLO=L为例:(注意所有字母要大写)
+```
+bash run_func_test_spec.sh SINGLE RK 100 50 L
+```
+       
 ****
 ## 性能测试使用说明
+### 完整功能测试（均在SYSV目录下使用）
 在SYSV目录下，使用命令
-```bash
-run_perf_test.sh
 ```
-其中，若想单独测试某一规模，则使用命令：（以RK下的SINGLE类型为例）
-```bash
-./test/perf_test_RK/perf_test_RK_SINGLE.o N NRHS UPLO
+bash run_perf_test.sh
 ```
-其中N和NRHS为规模数字，UPLO为U或者L。
+### 单独测试某一规模
+若想单独测试某一规模，则使用命令：
+```
+bash run_perf_test_spec.sh type func N NRHS UPLO numThread
+```
+以RK函数的SINGLE类型，N=100，NRHS=50，UPLO=L，线程数48为例:(注意所有字母要大写)
+```
+bash run_perf_test_spec.sh SINGLE RK 100 50 L 48
+```
 
 
 

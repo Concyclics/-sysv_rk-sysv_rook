@@ -300,7 +300,7 @@ void SYTF2_ROOK(const char* uplo,
                              *  store L(k) in column k
                              */
                             d11 = A[k - 1 + (k - 1) * (LDA)];
-#pragma omp parallel for private(ii)
+                            #pragma omp parallel for private(ii)
                             for (ii = 1; ii < k; ii++) {
                                 A[ii - 1 + (k - 1) * (LDA)] /= d11;
                             }
@@ -318,33 +318,17 @@ void SYTF2_ROOK(const char* uplo,
                         }
                     }
                 } else {
-                    /*
-                     *  2-by-2 pivot block D(k): columns k and k-1 now hold
-                     *
-                     *  ( W(k-1) W(k) ) = ( U(k-1) U(k) )*D(k)
-                     *
-                     *  where U(k) and U(k-1) are the k-th and (k-1)-th columns
-                     *  of U
-                     *
-                     *  Perform a rank-2 update of A(1:k-2,1:k-2) as
-                     *
-                     *  A := A - ( U(k-1) U(k) )*D(k)*( U(k-1) U(k) )**T
-                     *     = A - ( ( A(k-1)A(k) )*inv(D(k)) ) * ( A(k-1)A(k)
-                     * )**T
-                     *
-                     *  and store L(k) and L(k+1) in columns k and k+1
-                     */
                     if (k > 2) {
                         d12 = A[k - 2 + (k - 1) * (LDA)];
                         d22 = A[k - 2 + (k - 2) * (LDA)] / d12;
                         d11 = A[k - 1 + (k - 1) * (LDA)] / d12;
                         t = T_ONE / (d11 * d22 - T_ONE);
-#pragma omp parallel for private(wkm1, wk, j)
                         for (j = k - 2; j >= 1; j--) {
                             wkm1 = t * (d11 * A[j - 1 + (k - 2) * (LDA)] -
                                         A[j - 1 + (k - 1) * (LDA)]);
                             wk = t * (d22 * A[j - 1 + (k - 1) * (LDA)] -
                                       A[j - 1 + (k - 2) * (LDA)]);
+                            #pragma omp parallel for private(i)
                             for (i = j; i >= 1; i--) {
                                 A[i - 1 + (j - 1) * (LDA)] -=
                                     A[i - 1 + (k - 1) * (LDA)] / d12 * wk +
@@ -456,26 +440,11 @@ void SYTF2_ROOK(const char* uplo,
                                 jMax = iTemp;
                             }
                         }
-                        /*
-                         *  Equivalent to testing for (used to handle NaN and
-                         * Inf) ABS( A( iMax, iMax ) ).GE.Alpha*rowMax
-                         */
                         if (ABS_(A[iMax - 1 + (iMax - 1) * (LDA)]) >=
                             Alpha * rowMax) {
-                            /*
-                             *  interchange rows and columns K and iMax,
-                             *  use 1-by-1 pivot block
-                             */
                             kp = iMax;
                             done = true;
                         } else if (p == jMax || rowMax <= colMax) {
-                            /*
-                             *  Equivalent to testing for rowMax .EQ. colMax,
-                             *  used to handle NaN and Inf
-                             *
-                             *  interchange rows and columns K+1 and iMax,
-                             *  use 2-by-2 pivot block
-                             */
                             kp = iMax;
                             kStep = 2;
                             done = true;
@@ -542,22 +511,10 @@ void SYTF2_ROOK(const char* uplo,
                 // update the trailing submatrix
 
                 if (kStep == 1) {
-                    /*
-                     *  1-by-1 pivot block D(k): column k now holds
-                     *
-                     *  W(k) = L(k)*D(k)
-                     *
-                     *  where L(k) is the k-th column of L
-                     */
                     if (k < N) {
                         // Perform a rank-1 update of A(k+1:n,k+1:n) and store
                         // L(k) in column k
                         if (ABS_(A[k - 1 + (k - 1) * (LDA)]) >= sfMin) {
-                            /*
-                             *  Perform a rank-1 update of A(k+1:n,k+1:n) as
-                             *  A := A - L(k)*D(k)*L(k)**T
-                             *     = A - W(k)*(1/D(k))*W(k)**T
-                             */
                             d11 = T_ONE / A[k - 1 + (k - 1) * (LDA)];
                             d11 = -d11;
                             intTmp = N - k;
@@ -576,17 +533,11 @@ void SYTF2_ROOK(const char* uplo,
                         } else {
                             // Store L(k) in column k
                             d11 = A[k - 1 + (k - 1) * (LDA)];
-#pragma omp parallel for private(ii)
+                            #pragma omp parallel for private(ii)
                             for (ii = k + 1; ii <= N; ii++) {
                                 A[ii - 1 + (k - 1) * (LDA)] /= d11;
                             }
 
-                            /*
-                             *  Perform a rank-1 update of A(k+1:n,k+1:n) as
-                             *  A := A - L(k)*D(k)*L(k)**T
-                             *     = A - W(k)*(1/D(k))*W(k)**T
-                             *     = A - (W(k)/D(k))*(D(k))*(W(k)/D(K))**T
-                             */
                             d11 = -d11;
                             intTmp = N - k;
                             SYR_("L", &intTmp, &d11, A + k + (k - 1) * (LDA),
@@ -595,28 +546,11 @@ void SYTF2_ROOK(const char* uplo,
                         }
                     }
                 } else {
-                    /*
-                     *  2-by-2 pivot block D(k): columns k and k+1 now hold
-                     *
-                     *  ( W(k) W(k+1) ) = ( L(k) L(k+1) )*D(k)
-                     *
-                     *  where L(k) and L(k+1) are the k-th and (k+1)-th columns
-                     *  of L
-                     *
-                     *
-                     *  Perform a rank-2 update of A(k+2:n,k+2:n) as
-                     *
-                     *  A := A - ( L(k) L(k+1) ) * D(k) * ( L(k) L(k+1) )**T
-                     *     = A - ( ( A(k)A(k+1) )*inv(D(k) ) * ( A(k)A(k+1) )**T
-                     *
-                     *  and store L(k) and L(k+1) in columns k and k+1
-                     */
                     if (k < N - 1) {
                         d21 = A[k + (k - 1) * (LDA)];
                         d11 = A[k + (k) * (LDA)] / d21;
                         d22 = A[k - 1 + (k - 1) * (LDA)] / d21;
                         t = T_ONE / (d11 * d22 - T_ONE);
-#pragma omp parallel for private(j, wk, wkp1)
                         for (j = k + 2; j <= N; j++) {
                             // Compute  D21 * ( W(k)W(k+1) ) * inv(D(k)) for row
                             // J
@@ -627,6 +561,7 @@ void SYTF2_ROOK(const char* uplo,
                                         A[j - 1 + (k - 1) * (LDA)]);
 
                             // Perform a rank-2 update of A(k+2:n,k+2:n)
+                            #pragma omp parallel for private(i)
                             for (i = j; i <= N; i++) {
                                 A[i - 1 + (j - 1) * (LDA)] -=
                                     wk * A[i - 1 + (k - 1) * (LDA)] / d21 +

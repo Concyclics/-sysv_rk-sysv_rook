@@ -6,7 +6,7 @@
  *******************************************************************************/
 
 #include "SYTRS_ROOK.h"
-
+#include <stdio.h>
 void SYTRS_ROOK(const char* uplo,
                 const int* n,
                 const int* nrhs,
@@ -46,6 +46,7 @@ void SYTRS_ROOK(const char* uplo,
     if (*info != 0) {
         Xerbla("SYTRS_ROOK", &neg_info, 10);
     }
+
     /*
      *     Quick return if possible
      */

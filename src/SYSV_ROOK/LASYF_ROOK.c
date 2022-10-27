@@ -103,11 +103,6 @@ void LASYF_ROOK(const char* uplo,
                                   &LDA, w + iMax - 1 + kw * LDW, &LDW, &CONE,
                                   w + (kw - 2) * LDW, &intOne);
                         }
-                        /*
-                        JMAX is the column-index of the largest off-diagonal
-                        element in row IMAX, and ROWMAX is its absolute value.
-                        Determine both ROWMAX and JMAX.
-                        */
 
                         if (iMax != k) {
                             intTmp = k - iMax;
@@ -129,10 +124,6 @@ void LASYF_ROOK(const char* uplo,
                                 jMax = iTemp;
                             }
                         }
-                        /*
-                        Equivalent to testing for ABS( w( IMAX, KW-1 )
-                        ).GE.ALPHA*ROWMAX (used to handle NaN and Inf)
-                        */
                         if (ABS_(w[iMax - 1 + (kw - 2) * LDW]) >=
                             ALPHA * rowMax) {
                             // interchange rows and columns K and IMAX,use
@@ -502,12 +493,6 @@ computing blocks of NB columns at a time
                     SWAP_(&kk, w + kk - 1, &LDW, w + kp - 1, &LDW);
                 }
                 if (kStep == 1) {
-                    /*
-                    1-by-1 pivot block D(k): column k of w now holds
-                    w(k) = L(k)*D(k)
-                    where L(k) is the k-th column of L
-                    Store L(k) in column k of a
-                    */
                     intTmp = N - k + 1;
                     COPY_(&intTmp, w + k - 1 + (k - 1) * LDW, &intOne,
                           a + k - 1 + (k - 1) * LDA, &intOne);
@@ -531,11 +516,6 @@ computing blocks of NB columns at a time
                         }
                     }
                 } else {
-                    /*
-                    2-by-2 pivot block D(k): columns k and k+1 of w now hold
-                    ( w(k) w(k+1) ) = ( L(k) L(k+1) )*D(k)
-                    where L(k) and L(k+1) are the k-th and (k+1)-th columns of L
-                    */
                     if (k < N - 1) {
                         // Store L(k) and L(k+1) in columns k and k+1 of a
                         d21 = w[k + (k - 1) * LDW];
@@ -554,11 +534,6 @@ computing blocks of NB columns at a time
                                      d21);
                         }
                     }
-                    /*
-                    Copy diagonal elements of D(K) to a,
-                    copy subdiagonal element of D(K) to E(K) and
-                    ZERO out subdiagonal entry of a
-                    */
                     a[k - 1 + (k - 1) * LDA] = w[k - 1 + (k - 1) * LDW];
                     a[k + (k - 1) * LDA] = w[k + (k - 1) * LDW];
                     a[k + k * LDA] = w[k + k * LDW];

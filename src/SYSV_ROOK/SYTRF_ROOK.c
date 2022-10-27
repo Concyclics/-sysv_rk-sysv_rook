@@ -26,6 +26,9 @@ void SYTRF_ROOK(const char* uplo,
     int _one_1 = -1;
     int two2 = 2;
 
+    int max_threads = omp_get_max_threads();
+    int threads_use = MIN(max_threads, 24);
+
     *info = 0;
     upper = KmlLsame(*uplo, 'U');
     lQuery = (*lwork == -1);
@@ -92,12 +95,14 @@ void SYTRF_ROOK(const char* uplo,
                  *           Factorize columns k-kb+1:k of A and use blocked
                  * code to update columns 1:k-kb
                  */
+                BlasSetNumThreads(threads_use);
                 LASYF_ROOK(uplo, &k, &nb, &kb, A, lda, ipiv, work, &ldWork,
                            &iInfo);
             } else {
                 /*
                  *           Use unblocked code to factorize columns 1:k of A
                  */
+                BlasSetNumThreads(MIN(max_threads, 4));
                 SYTF2_ROOK(uplo, &k, A, lda, ipiv, &iInfo);
                 kb = k;
             }
@@ -134,6 +139,7 @@ void SYTRF_ROOK(const char* uplo,
                  * code to update columns k+kb:n
                  *
                  */
+                BlasSetNumThreads(threads_use);
                 int param = N - k + 1;
                 LASYF_ROOK(uplo, &param, &nb, &kb, A + k - 1 + (k - 1) * (LDA),
                            lda, ipiv + k - 1, work, &ldWork, &iInfo);
@@ -141,6 +147,7 @@ void SYTRF_ROOK(const char* uplo,
                 /*
                  *           Use unblocked code to factorize columns k:n of A
                  */
+                BlasSetNumThreads(MIN(max_threads, 4));
                 int param = N - k + 1;
                 SYTF2_ROOK(uplo, &param, A + k - 1 + (k - 1) * (LDA), lda,
                            ipiv + k - 1, &iInfo);
@@ -177,6 +184,7 @@ void SYTRF_ROOK(const char* uplo,
          */
     }
     work[0] = (float)lwkopt;
+    BlasSetNumThreads(max_threads);
     return;
     // End of SSYTRF_ROOK
 }

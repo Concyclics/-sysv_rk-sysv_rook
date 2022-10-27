@@ -57,32 +57,6 @@ void SYTRS_3(const char* uplo,
         return;
     }
     if (upper) {
-        /*
-         *        Begin Upper
-         *
-         *        Solve A*X = B, where A = U*D*U**T.
-         *
-         *        P**T * B
-         *
-         *        Interchange rows K and IPIV(K) of matrix B in the same order
-         *        that the formation order of IPIVi vector for Upper case.
-         *
-         *        (We can do the simple loop over IPIV with decrement -1,
-         *        since the ABS value of IPIVi represents the row index
-         *        of the interchange with row i in both 1x1 and 2x2 pivot cases)
-         */
-        //#pragma omp parallel for schedule(static) private(k, kp)
-        /*
-        //#pragma omp parallel for private(k, kp)
-        for (k = N; k > 0; k--) {
-            kp = ABS_(ipiv[k - 1]);
-            if (kp != k) {
-                //printf("k = %d, kp = %d\n", k, kp);
-                SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
-            }
-        }
-        */
-        // new swap
         for (k = 0; k < N; k++) {
             swaped[k] = k;
             visited[k] = 0;
@@ -171,32 +145,6 @@ void SYTRS_3(const char* uplo,
                 B[i - 1 + (j - 1) * LDB] = (akm1 * bk - bkm1) / deNom;
             }
         }
-
-/*
-for (i = N; i > 0; i--) {
-    if (ipiv[i - 1] > 0) {
-        dataType ALPHA_ = T_ONE / A[i - 1 + (i - 1) * LDA];
-    #if defined(COMPLEX) || defined(COMPLEX16)
-        SCAL_(&NRHS, (void*)&ALPHA_, B + i - 1, &LDB);
-    #else
-        SCAL_(&NRHS, &ALPHA_, B + i - 1, &LDB);
-    #endif
-    } else if (i > 1) {
-        akm1k = E[i - 1];
-        akm1 = A[i - 2 + (i - 2) * LDA] / akm1k;
-        ak = A[i - 1 + (i - 1) * LDA] / akm1k;
-        deNom = akm1 * ak - T_ONE;
-    #pragma omp parallel for schedule(static) private(j)
-        for (j = 1; j <= NRHS; j++) {
-            bkm1 = B[i - 2 + (j - 1) * LDB] / akm1k;
-            bk = B[i - 1 + (j - 1) * LDB] / akm1k;
-            B[i - 2 + (j - 1) * LDB] = (ak * bkm1 - bk) / deNom;
-            B[i - 1 + (j - 1) * LDB] = (akm1 * bk - bkm1) / deNom;
-        }
-        i--;
-    }
-}*/
-
 /*
  *        Compute (U**T \ B) -> B   [ U**T \ (D \ (U \P**T * B) ) ]
  */
@@ -205,25 +153,6 @@ for (i = N; i > 0; i--) {
 #else
         TRSM_("L", "U", "T", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        /*
-         *        P * B  [ P * (U**T \ (D \ (U \P**T * B) )) ]
-         *
-         *        Interchange rows K and IPIV(K) of matrix B in reverse order
-         *        from the formation order of IPIVi vector for Upper case.
-         *
-         *        (We can do the simple loop over IPIV with increment 1,
-         *        since the ABS value of IPIVi represents the row index
-         *        of the interchange with row i in both 1x1 and 2x2 pivot cases)
-         */
-        //#pragma omp parallel for schedule(static) private(k, kp)
-        //#pragma omp parallel for private(k, kp)
-        /*
-        for (k = 1; k <= N; k++) {
-            kp = ABS_(ipiv[k - 1]);
-            if (kp != k) {
-                SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
-            }
-        }*/
         for (k = 0; k < N; k++) {
             swaped[k] = k;
             visited[k] = 0;
@@ -261,21 +190,6 @@ for (i = N; i > 0; i--) {
         }
 
     } else {
-        /*
-         *        Begin Lower
-         *
-         *        Solve A*X = B, where A = L*D*L**T.
-         *
-         *        P**T * B
-         *        Interchange rows K and IPIV(K) of matrix B in the same order
-         *        that the formation order of IPIVi vector for Lower case.
-         *
-         *        (We can do the simple loop over IPIV with increment 1,
-         *        since the ABS value of IPIVi represents the row index
-         *        of the interchange with row i in both 1x1 and 2x2 pivot cases)
-         */
-        //#pragma omp parallel for schedule(static) private(k, kp)
-        //#pragma omp parallel for
         for (k = 0; k < N; k++) {
             swaped[k] = k;
             visited[k] = 0;
@@ -371,18 +285,6 @@ for (i = N; i > 0; i--) {
 #else
         TRSM_("L", "L", "T", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        /*
-         *        P * B  [ P * (L**T \ (D \ (L \P**T * B) )) ]
-         *
-         *        Interchange rows K and IPIV(K) of matrix B in reverse order
-         *        from the formation order of IPIVi vector for Lower case.
-         *
-         *        (We can do the simple loop over IPIV with decrement -1,
-         *        since the ABS value of IPIVi represents the row index
-         *        of the interchange with row i in both 1x1 and 2x2 pivot cases)
-         */
-        //#pragma omp parallel for schedule(static) private(k, kp)
-        //#pragma omp parallel for
         for (k = 0; k < N; k++) {
             swaped[k] = k;
             visited[k] = 0;
