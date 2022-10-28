@@ -18,7 +18,7 @@ done
 
 selectFlag="-ftrapv -fstack-protector-all -fno-omit-frame-pointer -fsanitize=address -ftest-coverage -fprofile-arcs"
 flags1="-fopenmp -llapack -lblas -lkservice -O2"
-flags2="-fopenmp -L ../.. -lSYSV -llapack -lkblas -lblas -lkservice -O2"
+flags2="-fopenmp -L ../.. -lSYSV -llapack -lkblas -lblas -lkservice -O2 $selectFlag"
 cd ../func_test_RK
 for DFlag in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
 do 
