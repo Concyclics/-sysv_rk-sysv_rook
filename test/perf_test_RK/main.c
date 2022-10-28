@@ -9,7 +9,9 @@ SYTRF_RK.c SYTRS_3.c LASYF_RK.c ilaenv.c -o main -L /usr/local/kml/lib
 int main(int argc, char* argv[]) {
     int N, NRHS;
     char UPLO;
-    srand((unsigned)time(NULL));
+    int setSeed = 19942;
+    // srand(time(NULL));
+    srand(setSeed);
     N = atoi(argv[1]);
     NRHS = atoi(argv[2]);
     UPLO = argv[3][0];

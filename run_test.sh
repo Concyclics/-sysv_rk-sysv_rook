@@ -43,18 +43,15 @@ for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
 
 BLOCK
 
-for i in {1..30..1}
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
 do
-    for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
-    do
-    ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 19 10 U
-    ./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 U
-    done
-    for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
-    do
-    ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 19 10 L
-    ./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 L
-    done
+./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 19 10 U
+./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 U
+done
+for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
+do
+./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 19 10 L
+./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 L
 done
 
 #./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U

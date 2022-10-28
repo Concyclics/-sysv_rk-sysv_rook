@@ -16,24 +16,24 @@
 
 int main(int argc, char* argv[]) {
     char method = argv[1][0];
-    if(method == 'H'||method == 'h'){
+    if (method == 'H' || method == 'h') {
         printf("func_test help:\n");
         printf("N: test nullptr\n");
         printf("E: test exception\n");
         printf("S: solve matrix\n with 3 args: N, NRHS, UPLO\n");
         return 0;
     }
-    if(method == 'N'||method == 'n'){
+    if (method == 'N' || method == 'n') {
         printf("func_test nullptr:\n");
         nullptr_test(10, 10);
         return 0;
     }
-    if(method == 'E'||method == 'e'){
+    if (method == 'E' || method == 'e') {
         printf("func_test exception:\n");
         exception_test(10, 10);
         return 0;
     }
-    if(method != 'S'&&method != 's'){
+    if (method != 'S' && method != 's') {
         printf("func_test error: wrong method\n");
         return 0;
     }
@@ -59,10 +59,11 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-
 #ifdef GENERATE_DATA
 
-    srand(time(NULL));
+    int setSeed = 19942;
+    // srand(time(NULL));
+    srand(setSeed);
     int seed = rand();
     double result;
     freopen("seeds_answers_TestTypeName.txt", "w", stdout);
@@ -75,8 +76,7 @@ int main(int argc, char* argv[]) {
     int seed;
     double result_OS, result_US;
     scanf("%d %lf", &seed, &result_OS);
-    result_US =
-            _TestWithSeed(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
+    result_US = _TestWithSeed(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
     printf("test N = %d, NRHS = %d, UPLO = %c\n", N, NRHS, UPLO);
     printf("result_OS = %f, result_US = %f\n", result_OS, result_US);
     if (result_OS > result_US) {
