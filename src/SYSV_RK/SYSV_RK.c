@@ -65,7 +65,7 @@ void SYSV_RK(const char* uplo,
     }
 
     if (*info == 0) {
-        if (*n != 0) {
+        if (*n == 0) {
             lwkopt = 1;
         } else {
             int temp = -1;
