@@ -30,7 +30,7 @@ void SYTRF_RK(const char* uplo,
     int two2 = 2;
 
     int max_threads = omp_get_max_threads();
-    int threads_use = MIN(max_threads, 24);
+    int threads_use;
 
     char* name;
     char* opts;
@@ -96,11 +96,16 @@ void SYTRF_RK(const char* uplo,
         k = N;
         while (k > 0) {
             if (k > nb) {
+                if (k < 15000) {
+                    threads_use = MIN(max_threads, 24);
+                } else {
+                    threads_use = MIN(max_threads, 48);
+                }
                 BlasSetNumThreads(threads_use);
                 LASYF_RK(uplo, &k, &nb, &kb, A, lda, E, ipiv, work, &ldwork,
                          &iInfo);
             } else {
-                BlasSetNumThreads(MIN(max_threads, 4));
+                BlasSetNumThreads(MIN(max_threads, 24));
                 SYTF2_RK(uplo, &k, A, lda, E, ipiv, &iInfo);
                 kb = k;
             }

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-#bash build.sh 1
-#bash build_test.sh
+bash build.sh 1
+bash build_test.sh
 
 
 #export ASAN_OPTIONS=halt_on_error=0;log_path=/tmp/asan.log;detect_leaks=1

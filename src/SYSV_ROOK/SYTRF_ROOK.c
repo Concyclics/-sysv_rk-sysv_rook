@@ -27,7 +27,7 @@ void SYTRF_ROOK(const char* uplo,
     int two2 = 2;
 
     int max_threads = omp_get_max_threads();
-    int threads_use = MIN(max_threads, 24);
+    int threads_use;
 
     *info = 0;
     upper = KmlLsame(*uplo, 'U');
@@ -95,6 +95,11 @@ void SYTRF_ROOK(const char* uplo,
                  *           Factorize columns k-kb+1:k of A and use blocked
                  * code to update columns 1:k-kb
                  */
+                if (k < 15000) {
+                    threads_use = MIN(max_threads, 24);
+                } else {
+                    threads_use = MIN(max_threads, 48);
+                }
                 BlasSetNumThreads(threads_use);
                 LASYF_ROOK(uplo, &k, &nb, &kb, A, lda, ipiv, work, &ldWork,
                            &iInfo);
