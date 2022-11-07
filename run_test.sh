@@ -9,7 +9,7 @@ bash build_test.sh
 
 #export LD_PRELOAD=/usr/lib/gcc/aarch68-linux-gnu/10.3.1/libasan.so
 
-export OMP_NUM_THREADS=32
+export OMP_NUM_THREADS=48
 #./test/func_test_RK/generate_func_test_RK_SINGLE.o S 10 10 U
 #./test/func_test_RK/func_test_RK_SINGLE.o S 10 10 U
 #./test/func_test_RK/generate_func_test_RK_DOUBLE.o S 10 10 U
@@ -41,7 +41,7 @@ for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
     ./test/func_test_ROOK/func_test_ROOK_$type.o S 4 4 L
     done
 
-BLOCK
+
 
 for type in {'SINGLE','DOUBLE','COMPLEX','COMPLEX16'}
 do
@@ -53,8 +53,8 @@ do
 ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S 19 10 L
 ./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 L
 done
-
-#./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
+BLOCK
+./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
 #./test/perf_test_ROOK/perf_test_ROOK_SINGLE.o 300 300 U
 #./test/perf_test_RK/perf_test_RK_SINGLE.o 5000 5000 L
 #./test/perf_test_RK/perf_test_RK_SINGLE.o  L

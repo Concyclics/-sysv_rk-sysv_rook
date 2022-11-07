@@ -30,6 +30,7 @@ void SYTRF_RK(const char* uplo,
     int two2 = 2;
 
     int max_threads = omp_get_max_threads();
+    // int threads_use = MIN(max_threads, 24);
     int threads_use;
 
     char* name;
@@ -96,16 +97,24 @@ void SYTRF_RK(const char* uplo,
         k = N;
         while (k > 0) {
             if (k > nb) {
-                if (k < 15000) {
-                    threads_use = MIN(max_threads, 24);
+                if (N <= 8500) {
+                    threads_use = 16;
+                } else if (N <= 16500) {
+                    threads_use = 20;
+                } else if (N <= 25000) {
+                    threads_use = 24;
+                } else if (N <= 30000) {
+                    threads_use = 28;
+                } else if (N <= 40000) {
+                    threads_use = 32;
                 } else {
-                    threads_use = MIN(max_threads, 48);
+                    threads_use = 48;
                 }
-                BlasSetNumThreads(threads_use);
+                BlasSetNumThreads(MIN(max_threads, threads_use));
                 LASYF_RK(uplo, &k, &nb, &kb, A, lda, E, ipiv, work, &ldwork,
                          &iInfo);
             } else {
-                BlasSetNumThreads(MIN(max_threads, 24));
+                BlasSetNumThreads(MIN(max_threads, 4));
                 SYTF2_RK(uplo, &k, A, lda, E, ipiv, &iInfo);
                 kb = k;
             }
@@ -157,7 +166,20 @@ void SYTRF_RK(const char* uplo,
         k = 1;
         while (k <= N) {
             if (k <= N - nb) {
-                BlasSetNumThreads(threads_use);
+                if (N <= 8500) {
+                    threads_use = 16;
+                } else if (N <= 16500) {
+                    threads_use = 20;
+                } else if (N <= 25000) {
+                    threads_use = 24;
+                } else if (N <= 30000) {
+                    threads_use = 28;
+                } else if (N <= 40000) {
+                    threads_use = 32;
+                } else {
+                    threads_use = 48;
+                }
+                BlasSetNumThreads(MIN(max_threads, threads_use));
                 int param = N - k + 1;
                 LASYF_RK(uplo, &param, &nb, &kb, A + k - 1 + (k - 1) * (LDA),
                          lda, E + k - 1, ipiv + k - 1, work, &ldwork, &iInfo);
