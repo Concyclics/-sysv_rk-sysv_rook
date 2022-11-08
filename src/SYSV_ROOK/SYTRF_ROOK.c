@@ -78,95 +78,66 @@ void SYTRF_ROOK(const char* uplo,
     }
 
     if (upper) {
-        /*
-         *        Factorize A as U*D*U**T using the upper triangle of A
-         *
-         *        K is the main loop index, decreasing from N to 1 in steps of
-         *        KB, where KB is the number of columns factorized by SLASYF_RK;
-         *        KB is either NB or NB-1, or K for the last block
-         */
         k = N;
-        /*
-         *        If K < 1, exit from loop
-         */
         while (k > 0) {
             if (k > nb) {
-                /*
-                 *           Factorize columns k-kb+1:k of A and use blocked
-                 * code to update columns 1:k-kb
-                 */
-                if (k < 15000) {
-                    threads_use = MIN(max_threads, 24);
+                if (N <= 8500) {
+                    threads_use = 16;
+                } else if (N <= 16500) {
+                    threads_use = 20;
+                } else if (N <= 25000) {
+                    threads_use = 24;
+                } else if (N <= 30000) {
+                    threads_use = 28;
+                } else if (N <= 40000) {
+                    threads_use = 32;
                 } else {
-                    threads_use = MIN(max_threads, 48);
+                    threads_use = 48;
                 }
-                BlasSetNumThreads(threads_use);
+                BlasSetNumThreads(MIN(max_threads, threads_use));
                 LASYF_ROOK(uplo, &k, &nb, &kb, A, lda, ipiv, work, &ldWork,
                            &iInfo);
             } else {
-                /*
-                 *           Use unblocked code to factorize columns 1:k of A
-                 */
                 BlasSetNumThreads(MIN(max_threads, 4));
                 SYTF2_ROOK(uplo, &k, A, lda, ipiv, &iInfo);
                 kb = k;
             }
-            /*
-             *        Set INFO on the first occurrence of a zero pivot
-             */
             if (info == 0 && iInfo > 0) {
                 *info = iInfo;
             }
-            /*
-             *        No need to adjust IPIV
-             *
-             *        Decrease K and return to the start of the main loop
-             */
             k -= kb;
         }
-        /*
-         *        This label is the exit from main loop over K decreasing
-         *        from N to 1 in steps of KB
-         */
     } else {
-        /*
-         *        Factorize A as L*D*L**T using the lower triangle of A
-         *
-         *        K is the main loop index, increasing from 1 to N in steps of
-         *        KB, where KB is the number of columns factorized by SLASYF_RK;
-         *        KB is either NB or NB-1, or N-K+1 for the last block
-         */
         k = 1;
         while (k <= N) {
             if (k <= N - nb) {
-                /*
-                 *           Factorize columns k:k+kb-1 of A and use blocked
-                 * code to update columns k+kb:n
-                 *
-                 */
-                BlasSetNumThreads(threads_use);
+                if (N <= 8500) {
+                    threads_use = 16;
+                } else if (N <= 16500) {
+                    threads_use = 20;
+                } else if (N <= 25000) {
+                    threads_use = 24;
+                } else if (N <= 30000) {
+                    threads_use = 28;
+                } else if (N <= 40000) {
+                    threads_use = 32;
+                } else {
+                    threads_use = 48;
+                }
+                BlasSetNumThreads(MIN(max_threads, threads_use));
                 int param = N - k + 1;
                 LASYF_ROOK(uplo, &param, &nb, &kb, A + k - 1 + (k - 1) * (LDA),
                            lda, ipiv + k - 1, work, &ldWork, &iInfo);
             } else {
-                /*
-                 *           Use unblocked code to factorize columns k:n of A
-                 */
                 BlasSetNumThreads(MIN(max_threads, 4));
                 int param = N - k + 1;
                 SYTF2_ROOK(uplo, &param, A + k - 1 + (k - 1) * (LDA), lda,
                            ipiv + k - 1, &iInfo);
                 kb = N - k + 1;
             }
-            /*
-             *        Set INFO on the first occurrence of a zero pivot
-             */
             if (info == 0 && iInfo > 0) {
                 *info = iInfo + k - 1;
             }
-            /*
-             *        Adjust IPIV
-             */
             for (i = k; i < k + kb; i++) {
                 if (ipiv[i - 1] > 0) {
                     ipiv[i - 1] += k - 1;
@@ -174,22 +145,10 @@ void SYTRF_ROOK(const char* uplo,
                     ipiv[i - 1] += -k + 1;
                 }
             }
-            /*
-             *        Increase K and return to the start of the main loop
-             */
             k += kb;
         }
-        /*
-         *        This label is the exit from main loop over K increasing
-         *        from 1 to N in steps of KB
-         */
-
-        /*
-         *     End Lower
-         */
     }
     work[0] = (float)lwkopt;
     BlasSetNumThreads(max_threads);
     return;
-    // End of SSYTRF_ROOK
 }

@@ -1,11 +1,14 @@
 set -e
 
+bash build.sh 1
+bash build_test.sh
+
 #export ASAN_OPTIONS=halt_on_error=0;log_path=/tmp/asan.log;detect_leaks=1
 
 #export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
 echo "Running performance tests"
     echo "test RK"
-for numThread in{1,48,96}
+for numThread in {1,48,96}
 do
     export OMP_NUM_THREADS=$numThread
     echo NUM_THREAD $numThread
@@ -69,7 +72,7 @@ done
 
 echo 'test ROOK'
 
-for numThread in{1,48,96}
+for numThread in {1,48,96}
 do
     export OMP_NUM_THREADS=$numThread
     echo NUM_THREAD $numThread

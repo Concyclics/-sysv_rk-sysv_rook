@@ -24,46 +24,34 @@ int ilaenv(const int* ispec,
 
     if (KmlLsame(*name, 'S')) {
         if (n <= 4000) {
-            return 8;
-
-        } else if (n <= 7000) {
-            return 32;
-
+            return 16;
         } else {
             return 64;
-
-        } 
+        }
     } else if (KmlLsame(*name, 'D')) {
         if (n <= 4000) {
-            return 8;
-
-        } else if (n <= 10000) {
             return 16;
-
         } else {
             return 64;
         }
     } else if (KmlLsame(*name, 'C')) {
-        if (n <= 4000) {
+        if (n <= 1000) {
             return 8;
-
-        } else if (n <= 10000) {
+        } else if (n <= 2000) {
+            return 16;
+        } else if (n <= 4000) {
             return 32;
-
         } else {
             return 64;
         }
     } else if (KmlLsame(*name, 'Z')) {
-        if (n <= 1000) {
+        if (n <= 2000) {
             return 8;
-
-        } else if (n <= 15000) {
+        } else if (n <= 9000) {
             return 32;
-
         } else {
             return 64;
         }
-
-        return 0;
     }
+    return -1;
 }

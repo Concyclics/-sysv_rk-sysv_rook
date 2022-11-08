@@ -61,6 +61,7 @@ do
     ((time=$RANDOM%5+1))
     echo "test time = $time"
     for ((i=0;i<$time;i++)); do
+        ((UPLO=$RANDOM%2+1))
         if [ $UPLO -eq 1 ]
         then
             UPLO=L
@@ -130,6 +131,7 @@ do
     echo "test time = $time"
     echo "test time = $time"
     for ((i=0;i<$time;i++)); do
+        ((UPLO=$RANDOM%2+1))
         if [ $UPLO -eq 1 ]
         then
             UPLO=L
