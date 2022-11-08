@@ -136,17 +136,6 @@ void LASYF_RK(const char* uplo,
                             }
                         }
                         /*
-                                                if (iMax == k) {
-                                                    rowMax = ZERO;
-                                                } else {
-                                                    sTemp = w[iMax - 1 + (kw -
-                           2) * LDW]; w[iMax - 1 + (kw - 2) * LDW] = 0; intTmp =
-                           k; jMax = I_AMAX(&intTmp, w + (kw - 2) * LDW,
-                           &intOne); rowMax = ABS_(w[jMax - 1 + (kw - 2) *
-                           LDW]); w[iMax - 1 + (kw - 2) * LDW] = sTemp;
-                                                }
-                        */
-                        /*
                         Equivalent to testing for ABS( w( IMAX, KW-1 )
                         ).GE.ALPHA*ROWMAX (used to handle NaN and Inf)
                         */

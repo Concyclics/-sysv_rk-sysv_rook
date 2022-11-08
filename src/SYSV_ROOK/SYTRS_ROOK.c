@@ -6,7 +6,6 @@
  *******************************************************************************/
 
 #include "SYTRS_ROOK.h"
-#include <stdio.h>
 void SYTRS_ROOK(const char* uplo,
                 const int* n,
                 const int* nrhs,

@@ -82,7 +82,7 @@ void SYTRS_3(const char* uplo,
         }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < LDB; k++) {
+        for (k = 0; k < NRHS; k++) {
             dataType Btmp[cnt];
             for (i = 0; i < cnt; i++) {
                 Btmp[i] = B[swaped[index[i]] + LDB * k];
@@ -179,7 +179,7 @@ void SYTRS_3(const char* uplo,
         }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < LDB; k++) {
+        for (k = 0; k < NRHS; k++) {
             dataType Btmp[cnt];
             for (i = 0; i < cnt; i++) {
                 Btmp[i] = B[swaped[index[i]] + k * LDB];
@@ -216,7 +216,7 @@ void SYTRS_3(const char* uplo,
         }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < LDB; k++) {
+        for (k = 0; k < NRHS; k++) {
             dataType Btmp[cnt];
             for (i = 0; i < cnt; i++) {
                 Btmp[i] = B[swaped[index[i]] + k * LDB];
@@ -311,7 +311,7 @@ void SYTRS_3(const char* uplo,
         }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < LDB; k++) {
+        for (k = 0; k < NRHS; k++) {
             dataType Btmp[cnt];
             for (i = 0; i < cnt; i++) {
                 Btmp[i] = B[swaped[index[i]] + k * LDB];
