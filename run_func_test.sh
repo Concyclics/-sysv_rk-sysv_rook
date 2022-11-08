@@ -30,7 +30,6 @@ do
         
         ((N=$RANDOM%900+100))
         ((NRHS=$RANDOM%($N-100)+100))
-
         echo N=$N
         echo NRHS=$NRHS
         echo UPLO=$UPLO
@@ -51,6 +50,9 @@ do
         fi
         ((N=$RANDOM%9000+1000))
         ((NRHS=$RANDOM%($N-1000)+1000))
+        echo N=$N
+        echo NRHS=$NRHS
+        echo UPLO=$UPLO
         ./test/func_test_RK/generate_func_test_RK_$type.o S $N $NRHS $UPLO
         ./test/func_test_RK/func_test_RK_$type.o S $N $NRHS $UPLO
     done
@@ -67,6 +69,9 @@ do
         fi
         ((N=$RANDOM%30000+10000))
         ((NRHS=$RANDOM%($N-10000)+10000))
+        echo N=$N
+        echo NRHS=$NRHS
+        echo UPLO=$UPLO
         ./test/func_test_RK/generate_func_test_RK_$type.o S $N $NRHS $UPLO
         ./test/func_test_RK/func_test_RK_$type.o S $N $NRHS $UPLO
     done
@@ -93,6 +98,9 @@ do
         fi
         ((N=$RANDOM%900+100))
         ((NRHS=$RANDOM%($N-100)+100))
+        echo N=$N
+        echo NRHS=$NRHS
+        echo UPLO=$UPLO
         ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S $N $NRHS $UPLO
         ./test/func_test_ROOK/func_test_ROOK_$type.o S $N $NRHS $UPLO
     done
@@ -110,6 +118,9 @@ do
         fi
         ((N=$RANDOM%9000+1000))
         ((NRHS=$RANDOM%($N-1000)+1000))
+        echo N=$N
+        echo NRHS=$NRHS
+        echo UPLO=$UPLO
         ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S $N $NRHS $UPLO
         ./test/func_test_ROOK/func_test_ROOK_$type.o S $N $NRHS $UPLO
     done
@@ -127,6 +138,9 @@ do
         fi
         ((N=$RANDOM%30000+10000))
         ((NRHS=$RANDOM%($N-10000)+10000))
+        echo N=$N
+        echo NRHS=$NRHS
+        echo UPLO=$UPLO
         ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S $N $NRHS $UPLO
         ./test/func_test_ROOK/func_test_ROOK_$type.o S $N $NRHS $UPLO
     done
