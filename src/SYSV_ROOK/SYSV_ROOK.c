@@ -62,7 +62,7 @@ void SYSV_ROOK(const char* uplo,
     }
 
     if (*info == 0) {
-        if (*n != 0) {
+        if (*n == 0) {
             lwkopt = 1;
         } else {
             int temp = -1;
