@@ -47,14 +47,14 @@ int main(int argc, char* argv[]) {
     funcTdataAccu* W1;
     int* ipiv;
     int size = sizeof(funcTdataType);
-    if (((A = (funcTdataType*)malloc(size * N * N)) == NULL) ||
-        ((A1 = (funcTdataType*)malloc(size * N * N)) == NULL) ||
-        ((B1 = (funcTdataType*)malloc(size * N * NRHS)) == NULL) ||
-        ((B3 = (funcTdataType*)malloc(size * N * NRHS)) == NULL) ||
-        ((W = (funcTdataType*)malloc(size * N * N)) == NULL) ||
-        ((W1 = (funcTdataAccu*)malloc(sizeof(funcTdataAccu) * N * N)) ==
-         NULL) ||
-        ((ipiv = (int*)malloc(sizeof(int) * N)) == NULL)) {
+    if (((A = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((A1 = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((B1 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((B3 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((W = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((W1 = (funcTdataAccu*)malloc((long int)sizeof(funcTdataAccu) * N *
+                                      N)) == NULL) ||
+        ((ipiv = (int*)malloc((long int)sizeof(int) * N)) == NULL)) {
         printf("malloc error!\n");
         return -1;
     }
