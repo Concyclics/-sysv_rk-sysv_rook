@@ -69,7 +69,19 @@ void SYTF2_ROOK(const char* uplo,
     }
 
     if (*info != 0) {
-        xerbla_("SYTF2_ROOK", info, 7);
+        int neg_info = -*info;
+#ifdef SINGLE
+        Xerbla("SYTF2_ROOK", &neg_info, 7);
+#endif
+#ifdef DOUBLE
+        Xerbla("DYTF2_ROOK", &neg_info, 7);
+#endif
+#ifdef COMPLEX
+        Xerbla("CYTF2_ROOK", &neg_info, 7);
+#endif
+#ifdef COMPLEX16
+        Xerbla("ZYTF2_ROOK", &neg_info, 7);
+#endif
         return;
     }
 
@@ -300,7 +312,7 @@ void SYTF2_ROOK(const char* uplo,
                              *  store L(k) in column k
                              */
                             d11 = A[k - 1 + (k - 1) * (LDA)];
-                            #pragma omp parallel for private(ii)
+#pragma omp parallel for private(ii)
                             for (ii = 1; ii < k; ii++) {
                                 A[ii - 1 + (k - 1) * (LDA)] /= d11;
                             }
@@ -328,7 +340,7 @@ void SYTF2_ROOK(const char* uplo,
                                         A[j - 1 + (k - 1) * (LDA)]);
                             wk = t * (d22 * A[j - 1 + (k - 1) * (LDA)] -
                                       A[j - 1 + (k - 2) * (LDA)]);
-                            #pragma omp parallel for private(i)
+#pragma omp parallel for private(i)
                             for (i = j; i >= 1; i--) {
                                 A[i - 1 + (j - 1) * (LDA)] -=
                                     A[i - 1 + (k - 1) * (LDA)] / d12 * wk +
@@ -533,7 +545,7 @@ void SYTF2_ROOK(const char* uplo,
                         } else {
                             // Store L(k) in column k
                             d11 = A[k - 1 + (k - 1) * (LDA)];
-                            #pragma omp parallel for private(ii)
+#pragma omp parallel for private(ii)
                             for (ii = k + 1; ii <= N; ii++) {
                                 A[ii - 1 + (k - 1) * (LDA)] /= d11;
                             }
@@ -560,8 +572,8 @@ void SYTF2_ROOK(const char* uplo,
                             wkp1 = t * (d22 * A[j - 1 + (k) * (LDA)] -
                                         A[j - 1 + (k - 1) * (LDA)]);
 
-                            // Perform a rank-2 update of A(k+2:n,k+2:n)
-                            #pragma omp parallel for private(i)
+// Perform a rank-2 update of A(k+2:n,k+2:n)
+#pragma omp parallel for private(i)
                             for (i = j; i <= N; i++) {
                                 A[i - 1 + (j - 1) * (LDA)] -=
                                     wk * A[i - 1 + (k - 1) * (LDA)] / d21 +

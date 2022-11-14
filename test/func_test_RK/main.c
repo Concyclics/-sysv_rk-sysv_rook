@@ -33,6 +33,10 @@ int main(int argc, char* argv[]) {
         exception_test(10, 10);
         return 0;
     }
+    if (method == 'C' || method == 'c') {
+        printf("cover:\n");
+        return cover();
+    }
     if (method != 'S' && method != 's') {
         printf("func_test error: wrong method\n");
         return 0;

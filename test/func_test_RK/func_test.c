@@ -46,6 +46,110 @@ double _TestWithSeed(int rand_seed,
     return RESID;
 }
 
+int cover() {
+    int N, NRHS, NB;
+    char UPLO;
+    N = 20;
+    NRHS = 20;
+    NB = 16;
+    UPLO = 'U';
+    funcTdataType *A, *A1, *E, *B1, *B3, *W;
+    funcTdataAccu* W1;
+    int* ipiv;
+    char sla[] = {'S'};
+    dataAccu sfMin = lamch_(sla);
+    int size = sizeof(funcTdataType);
+    if (((A = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((A1 = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((E = (funcTdataType*)malloc((long int)size * N)) == NULL) ||
+        ((B1 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((B3 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((W = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((W1 = (funcTdataAccu*)malloc((long int)sizeof(funcTdataAccu) * N *
+                                      N)) == NULL) ||
+        ((ipiv = (int*)malloc((long int)sizeof(int) * N)) == NULL)) {
+        printf("malloc error!\n");
+        return -1;
+    }
+
+    int info;
+    // A[all] = sfmin/2;
+    UPLO = 'U';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    LASYF_RK(&UPLO, &N, &NB, &N, A, &N, E, ipiv, W, &N, &info);
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    SYTF2_RK(&UPLO, &N, A, &N, E, ipiv, &info);
+    UPLO = 'L';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    LASYF_RK(&UPLO, &N, &NB, &N, A, &N, E, ipiv, W, &N, &info);
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    SYTF2_RK(&UPLO, &N, A, &N, E, ipiv, &info);
+    // A[all]=0
+    UPLO = 'U';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 0;
+    }
+    SYSV_RK(&UPLO, &N, &NRHS, A, &N, E, ipiv, B1, &N, W, &N, &info);
+    UPLO = 'L';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 0;
+    }
+    SYSV_RK(&UPLO, &N, &NRHS, A, &N, E, ipiv, B1, &N, W, &N, &info);
+    // N=NRHS=0
+    for (int i = 0; i < N * N; i++) {
+        A[i] = rand();
+    }
+    int lda = 1, ldb = 1, ldw = 1;
+    int zero_0 = 0, neg_1 = -1;
+    UPLO = 'U';
+    SYSV_RK(&UPLO, &zero_0, &zero_0, A, &lda, E, ipiv, B1, &ldb, W, &ldw,
+            &info);
+    UPLO = 'L';
+    SYSV_RK(&UPLO, &zero_0, &zero_0, A, &lda, E, ipiv, B1, &ldb, W, &ldw,
+            &info);
+    // lwork<nb
+    N = 20;
+    SYTRF_RK(&UPLO, &N, A, &N, E, ipiv, W, &N, &info);
+    // SYTRF parameter error
+    char non_uplo = 'a';
+    SYTRF_RK(&non_uplo, &N, A, &N, E, ipiv, W, &N, &info);
+    SYTRF_RK(&UPLO, &neg_1, A, &N, E, ipiv, W, &N, &info);
+    SYTRF_RK(&UPLO, &N, A, &neg_1, E, ipiv, W, &N, &info);
+    SYTRF_RK(&UPLO, &N, A, &N, E, ipiv, W, &zero_0, &info);
+    UPLO = 'U';
+    SYTRF_RK(&UPLO, &zero_0, A, &lda, E, ipiv, W, &ldw, &info);
+    UPLO = 'L';
+    SYTRF_RK(&UPLO, &zero_0, A, &lda, E, ipiv, W, &ldw, &info);
+    // SYTF2 parameter error
+    SYTF2_RK(&non_uplo, &N, A, &N, E, ipiv, &info);
+    SYTF2_RK(&UPLO, &neg_1, A, &N, E, ipiv, &info);
+    SYTF2_RK(&UPLO, &N, A, &neg_1, E, ipiv, &info);
+    // SYTRS parameter error
+    SYTRS_3(&non_uplo, &N, &NRHS, A, &N, E, ipiv, B1, &N, &info);
+    SYTRS_3(&UPLO, &neg_1, &NRHS, A, &N, E, ipiv, B1, &N, &info);
+    SYTRS_3(&UPLO, &N, &neg_1, A, &N, E, ipiv, B1, &N, &info);
+    SYTRS_3(&UPLO, &N, &NRHS, A, &neg_1, E, ipiv, B1, &N, &info);
+    SYTRS_3(&UPLO, &N, &NRHS, A, &N, E, ipiv, B1, &neg_1, &info);
+
+    free(A);
+    free(A1);
+    free(E);
+    free(B1);
+    free(B3);
+    free(W);
+    free(W1);
+    free(ipiv);
+    return 0;
+}
+
 void _FuncTest(int times,
                char scale,
                funcTdataType* A,
@@ -206,7 +310,7 @@ void exception_test(int N, int M) {
     SYSV_RK(&uplo, &N, &NRHS, A, &N, E, ipiv, B, &neg, W, &N, &info);
     printf("test exception for param 11, ldwork\n");
     SYSV_RK(&uplo, &N, &NRHS, A, &N, E, ipiv, B, &N, W, &neg, &info);
-    
+
     free(A);
     free(B);
     free(E);
@@ -215,5 +319,3 @@ void exception_test(int N, int M) {
 
     printf("test exception end\n");
 }
-
-

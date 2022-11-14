@@ -16,6 +16,8 @@ do
     echo "test $type"
     ./test/func_test_RK/func_test_RK_$type.o N
     ./test/func_test_RK/func_test_RK_$type.o E
+    ./test/func_test_RK/func_test_RK_$type.o C
+
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"
@@ -86,6 +88,8 @@ do
     echo "test $type"
     ./test/func_test_ROOK/func_test_ROOK_$type.o N
     ./test/func_test_ROOK/func_test_ROOK_$type.o E
+    ./test/func_test_ROOK/func_test_ROOK_$type.o C
+
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"

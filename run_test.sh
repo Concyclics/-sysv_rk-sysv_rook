@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-bash build.sh 1
+bash build.sh 2
 bash build_test.sh
 
 
@@ -54,7 +54,15 @@ do
 ./test/func_test_ROOK/func_test_ROOK_$type.o S 19 10 L
 done
 BLOCK
-./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
+./test/func_test_RK/func_test_RK_SINGLE.o C
+./test/func_test_RK/func_test_RK_DOUBLE.o C
+./test/func_test_RK/func_test_RK_COMPLEX.o C
+./test/func_test_RK/func_test_RK_COMPLEX16.o C
+./test/func_test_ROOK/func_test_ROOK_SINGLE.o C
+./test/func_test_ROOK/func_test_ROOK_DOUBLE.o C
+./test/func_test_ROOK/func_test_ROOK_COMPLEX.o C
+./test/func_test_ROOK/func_test_ROOK_COMPLEX16.o C
+#./test/perf_test_RK/perf_test_RK_SINGLE.o 9000 9000 U
 #./test/perf_test_ROOK/perf_test_ROOK_SINGLE.o 300 300 U
 #./test/perf_test_RK/perf_test_RK_SINGLE.o 5000 5000 L
 #./test/perf_test_RK/perf_test_RK_SINGLE.o  L

@@ -48,7 +48,20 @@ void SYTRS_3(const char* uplo,
     }
     int neg_info = -*info;
     if (*info != 0) {
+#ifdef SINGLE
         Xerbla("SSYTRS_3", &neg_info, 10);
+#endif
+#ifdef DOUBLE
+        Xerbla("DSYTRS_3", &neg_info, 10);
+#endif
+#ifdef COMPLEX
+        Xerbla("CSYTRS_3", &neg_info, 10);
+#endif
+#ifdef COMPLEX16
+        Xerbla("ZSYTRS_3", &neg_info, 10);
+#endif
+
+        return;
     }
     /*
      *     Quick return if possible

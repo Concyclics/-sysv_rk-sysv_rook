@@ -20,6 +20,8 @@
  */
 void _FuncTest(int times, char scale);
 
+int cover();
+
 double _TestWithSeed(int rand_seed,
                      int N,
                      int NRHS,

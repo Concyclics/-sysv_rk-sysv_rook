@@ -43,7 +43,19 @@ void SYTRF_ROOK(const char* uplo,
     }
 
     if (*info != 0) {
-        Xerbla("SYTRF_ROOK", info, 8);
+        int neg_info = -*info;
+#ifdef SINGLE
+        Xerbla("SYTRF_ROOK", &neg_info, 8);
+#endif
+#ifdef DOUBLE
+        Xerbla("DYTRF_ROOK", &neg_info, 8);
+#endif
+#ifdef COMPLEX
+        Xerbla("CYTRF_ROOK", &neg_info, 8);
+#endif
+#ifdef COMPLEX16
+        Xerbla("ZYTRF_ROOK", &neg_info, 8);
+#endif
         return;
     } else if (lQuery) {
         return;

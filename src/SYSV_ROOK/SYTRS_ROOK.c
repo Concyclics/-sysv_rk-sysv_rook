@@ -43,7 +43,19 @@ void SYTRS_ROOK(const char* uplo,
     }
     int neg_info = -*info;
     if (*info != 0) {
+#ifdef SINGLE
         Xerbla("SYTRS_ROOK", &neg_info, 10);
+#endif
+#ifdef DOUBLE
+        Xerbla("DYTRS_ROOK", &neg_info, 10);
+#endif
+#ifdef COMPLEX
+        Xerbla("CYTRS_ROOK", &neg_info, 10);
+#endif
+#ifdef COMPLEX16
+        Xerbla("ZYTRS_ROOK", &neg_info, 10);
+#endif
+        return;
     }
 
     /*

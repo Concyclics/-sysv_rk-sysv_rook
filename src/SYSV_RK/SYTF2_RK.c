@@ -50,7 +50,19 @@ void SYTF2_RK(const char* uplo,
     }
 
     if (*info != 0) {
-        xerbla_("SSYTF2_RK", info, 7);
+        int negInfo = -*info;
+#ifdef SINGLE
+        Xerbla("SSYTF2_RK", &negInfo, 7);
+#endif
+#ifdef DOUBLE
+        Xerbla("DSYTF2_RK", &negInfo, 7);
+#endif
+#ifdef COMPLEX
+        Xerbla("CSYTF2_RK", &negInfo, 7);
+#endif
+#ifdef COMPLEX16
+        Xerbla("ZSYTF2_RK", &negInfo, 7);
+#endif
         return;
     }
 

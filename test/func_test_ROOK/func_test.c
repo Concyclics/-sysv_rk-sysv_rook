@@ -17,8 +17,7 @@ double _TestWithSeed(int rand_seed,
                      funcTdataType* B3,
                      funcTdataType* W,
                      funcTdataAccu* W1,
-                     int* ipiv) 
-{
+                     int* ipiv) {
     srand(rand_seed);
 
     int size = sizeof(funcTdataType);
@@ -44,6 +43,106 @@ double _TestWithSeed(int rand_seed,
     _pot02_(&uplo, &N, &NRHS, A, &N, B1, &N, B3, &N, W1,
             &RESID);  // lapack code
     return RESID;
+}
+
+int cover() {
+    int N, NRHS, NB;
+    char UPLO;
+    N = 20;
+    NRHS = 20;
+    NB = 16;
+    UPLO = 'U';
+    funcTdataType *A, *A1, *B1, *B3, *W;
+    funcTdataAccu* W1;
+    int* ipiv;
+    char sla[] = {'S'};
+    dataAccu sfMin = lamch_(sla);
+    int size = sizeof(funcTdataType);
+    if (((A = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((A1 = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((B1 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((B3 = (funcTdataType*)malloc((long int)size * N * NRHS)) == NULL) ||
+        ((W = (funcTdataType*)malloc((long int)size * N * N)) == NULL) ||
+        ((W1 = (funcTdataAccu*)malloc((long int)sizeof(funcTdataAccu) * N *
+                                      N)) == NULL) ||
+        ((ipiv = (int*)malloc((long int)sizeof(int) * N)) == NULL)) {
+        printf("malloc error!\n");
+        return -1;
+    }
+
+    int info;
+    // A[all] = sfmin/2;
+    UPLO = 'U';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    LASYF_ROOK(&UPLO, &N, &NB, &N, A, &N, ipiv, W, &N, &info);
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    SYTF2_ROOK(&UPLO, &N, A, &N, ipiv, &info);
+    UPLO = 'L';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    LASYF_ROOK(&UPLO, &N, &NB, &N, A, &N, ipiv, W, &N, &info);
+    for (int i = 0; i < N * N; i++) {
+        A[i] = sfMin / 2;
+    }
+    SYTF2_ROOK(&UPLO, &N, A, &N, ipiv, &info);
+    // A[all]=0
+    UPLO = 'U';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 0;
+    }
+    SYSV_ROOK(&UPLO, &N, &NRHS, A, &N, ipiv, B1, &N, W, &N, &info);
+    UPLO = 'L';
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 0;
+    }
+    SYSV_ROOK(&UPLO, &N, &NRHS, A, &N, ipiv, B1, &N, W, &N, &info);
+    // N=NRHS=0
+    for (int i = 0; i < N * N; i++) {
+        A[i] = rand();
+    }
+    int lda = 1, ldb = 1, ldw = 1;
+    int zero_0 = 0, neg_1 = -1;
+    UPLO = 'U';
+    SYSV_ROOK(&UPLO, &zero_0, &zero_0, A, &lda, ipiv, B1, &ldb, W, &ldw, &info);
+    UPLO = 'L';
+    SYSV_ROOK(&UPLO, &zero_0, &zero_0, A, &lda, ipiv, B1, &ldb, W, &ldw, &info);
+    // lwork<nb
+    N = 20;
+    SYTRF_ROOK(&UPLO, &N, A, &N, ipiv, W, &N, &info);
+    // SYTRF parameter error
+    char non_uplo = 'a';
+    SYTRF_ROOK(&non_uplo, &N, A, &N, ipiv, W, &N, &info);
+    SYTRF_ROOK(&UPLO, &neg_1, A, &N, ipiv, W, &N, &info);
+    SYTRF_ROOK(&UPLO, &N, A, &neg_1, ipiv, W, &N, &info);
+    SYTRF_ROOK(&UPLO, &N, A, &N, ipiv, W, &zero_0, &info);
+    UPLO = 'U';
+    SYTRF_ROOK(&UPLO, &zero_0, A, &lda, ipiv, W, &ldw, &info);
+    UPLO = 'L';
+    SYTRF_ROOK(&UPLO, &zero_0, A, &lda, ipiv, W, &ldw, &info);
+    // SYTF2 parameter error
+    SYTF2_ROOK(&non_uplo, &N, A, &N, ipiv, &info);
+    SYTF2_ROOK(&UPLO, &neg_1, A, &N, ipiv, &info);
+    SYTF2_ROOK(&UPLO, &N, A, &neg_1, ipiv, &info);
+    // SYTRS parameter error
+    SYTRS_ROOK(&non_uplo, &N, &NRHS, A, &N, ipiv, B1, &N, &info);
+    SYTRS_ROOK(&UPLO, &neg_1, &NRHS, A, &N, ipiv, B1, &N, &info);
+    SYTRS_ROOK(&UPLO, &N, &neg_1, A, &N, ipiv, B1, &N, &info);
+    SYTRS_ROOK(&UPLO, &N, &NRHS, A, &neg_1, ipiv, B1, &N, &info);
+    SYTRS_ROOK(&UPLO, &N, &NRHS, A, &N, ipiv, B1, &neg_1, &info);
+
+    free(A);
+    free(A1);
+    free(B1);
+    free(B3);
+    free(W);
+    free(W1);
+    free(ipiv);
+    return 0;
 }
 
 void _FuncTest(int times, char scale) {
@@ -220,7 +319,7 @@ void exception_test(int N, int M) {
     SYSV_ROOK(&uplo, &N, &NRHS, A, &N, ipiv, B, &neg, W, &N, &info);
     printf("test exception for param 10, ldwork\n");
     SYSV_ROOK(&uplo, &N, &NRHS, A, &N, ipiv, B, &N, W, &neg, &info);
-    
+
     free(A);
     free(B);
     free(W);
