@@ -66,36 +66,19 @@ void SYTRS_ROOK(const char* uplo,
     }
 
     if (upper) {
-        /*
-         *  Solve A*X = B, where A = U*D*U**T.
-         *
-         *  First solve U*D*X = B, overwriting B with X.
-         *
-         *  K is the main loop index, decreasing from N to 1 in steps of
-         *  1 or 2, depending on the size of the diagonal blocks.
-         */
         k = N;
         while (k > 0) {
             if (ipiv[k - 1] > 0) {
-                /*
-                 *  1 x 1 diagonal block
-                 *
-                 *  Interchange rows K and IPIV(K).
-                 */
+
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
                 }
-                /*
-                 *  Multiply by inv(U(K)), where U(K) is the transformation
-                 *  stored in column K of A.
-                 */
+
                 intTmp = k - 1;
                 GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 1) * LDA, &intOne,
                      B + (k - 1), &LDB, B, &LDB);
-                /*
-                 *  Multiply by the inverse of the diagonal block.
-                 */
+
                 dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
 #if defined(COMPLEX) || defined(COMPLEX16)
                 SCAL_(&NRHS, (void*)&ALPHA_, B + k - 1, &LDB);
@@ -104,11 +87,7 @@ void SYTRS_ROOK(const char* uplo,
 #endif
                 k -= 1;
             } else {
-                /*
-                 *  2 x 2 diagonal block
-                 *
-                 *  Interchange rows K and -IPIV(K) THEN K-1 and -IPIV(K-1)
-                 */
+
                 kp = -ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -117,10 +96,7 @@ void SYTRS_ROOK(const char* uplo,
                 if (kp != k - 1) {
                     SWAP_(&NRHS, B + (k - 2), &LDB, B + (kp - 1), &LDB);
                 }
-                /*
-                 *  Multiply by inv(U(K)), where U(K) is the transformation
-                 *  stored in columns K-1 and K of A.
-                 */
+
                 if (k > 2) {
                     intTmp = k - 2;
                     GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 1) * LDA, &intOne,
@@ -128,9 +104,7 @@ void SYTRS_ROOK(const char* uplo,
                     GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 2) * LDA, &intOne,
                          B + (k - 2), &LDB, B, &LDB);
                 }
-                /*
-                 *  Multiply by the inverse of the diagonal block.
-                 */
+
                 akm1k = A[k - 2 + (k - 1) * (LDA)];
                 akm1 = A[k - 2 + (k - 2) * (LDA)] / akm1k;
                 ak = A[k - 1 + (k - 1) * (LDA)] / akm1k;
@@ -144,42 +118,25 @@ void SYTRS_ROOK(const char* uplo,
                 k -= 2;
             }
         }
-        /*
-         *  Next solve U**T *X = B, overwriting B with X.
-         *
-         *  K is the main loop index, increasing from 1 to N in steps of
-         *  1 or 2, depending on the size of the diagonal blocks.
-         */
+
         k = 1;
 
         while (k <= N) {
             if (ipiv[k - 1] > 0) {
-                /*
-                 *  1 x 1 diagonal block
-                 *
-                 *  Multiply by inv(U(K)), where U(K) is the transformation
-                 *  stored in column K of A.
-                 */
+
                 if (k > 1) {
                     intTmp = k - 1;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
                           A + (k - 1) * LDA, &intOne, &CONE, B + k - 1, &LDB);
                 }
-                /*
-                 *  Interchange rows K and IPIV(K).
-                 */
+
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
                 }
                 k += 1;
             } else {
-                /*
-                 *  2 x 2 diagonal block
-                 *
-                 *  Multiply by inv(U**T(K+1)), where U(K+1) is the
-                 * transformation stored in columns K and K+1 of A.
-                 */
+
                 if (k > 1) {
                     intTmp = k - 1;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
@@ -187,9 +144,7 @@ void SYTRS_ROOK(const char* uplo,
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB, A + k * LDA,
                           &intOne, &CONE, B + k, &LDB);
                 }
-                /*
-                 *  Interchange rows K and -IPIV(K) THEN K+1 and -IPIV(K+1).
-                 */
+
                 kp = -ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -202,36 +157,22 @@ void SYTRS_ROOK(const char* uplo,
             }
         }
     } else {
-        /*
-         *  Solve U**T *X = B, overwriting B with X.
-         *
-         *  K is the main loop index, increasing from N to 1 in steps of
-         *  -1 or -2, depending on the size of the diagonal blocks.
-         */
+
         k = 1;
         while (k <= N) {
             if (ipiv[k - 1] > 0) {
-                /*
-                 *  1 x 1 diagonal block
-                 *
-                 *  Interchange rows K and IPIV(K).
-                 */
+
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
                 }
-                /*
-                 *  Multiply by inv(L(K)), where L(K) is the transformation
-                 *  stored in column K of A.
-                 */
+
                 if (k < N) {
                     intTmp = N - k;
                     GER_(&intTmp, &NRHS, &NEG_CONE, A + k + (k - 1) * LDA,
                          &intOne, B + k - 1, &LDB, B + k, &LDB);
                 }
-                /*
-                 *  Multiply by the inverse of the diagonal block.
-                 */
+
                 dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
 #if defined(COMPLEX) || defined(COMPLEX16)
                 SCAL_(&NRHS, (void*)&ALPHA_, B + k - 1, &LDB);
@@ -240,11 +181,7 @@ void SYTRS_ROOK(const char* uplo,
 #endif
                 k += 1;
             } else {
-                /*
-                 *  2 x 2 diagonal block
-                 *
-                 *  Interchange rows K and -IPIV(K) THEN K+1 and -IPIV(K+1)
-                 */
+
                 kp = -ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -253,10 +190,7 @@ void SYTRS_ROOK(const char* uplo,
                 if (kp != k + 1) {
                     SWAP_(&NRHS, B + k, &LDB, B + kp - 1, &LDB);
                 }
-                /*
-                 *  Multiply by inv(L(K+1)), where L(K+1) is the transformation
-                 *  stored in columns K and K+1 of A.
-                 */
+
                 if (k < N - 1) {
                     intTmp = N - k - 1;
                     GER_(&intTmp, &NRHS, &NEG_CONE, A + k + 1 + (k - 1) * LDA,
@@ -264,9 +198,7 @@ void SYTRS_ROOK(const char* uplo,
                     GER_(&intTmp, &NRHS, &NEG_CONE, A + k + 1 + k * LDA,
                          &intOne, B + k, &LDB, B + k + 1, &LDB);
                 }
-                /*
-                 *  Multiply by the inverse of the diagonal block.
-                 */
+
                 akm1k = A[k + (k - 1) * (LDA)];
                 akm1 = A[k - 1 + (k - 1) * (LDA)] / akm1k;
                 ak = A[k + k * (LDA)] / akm1k;
@@ -280,43 +212,26 @@ void SYTRS_ROOK(const char* uplo,
                 k += 2;
             }
         }
-        /*
-         *  Next solve L**T *X = B, overwriting B with X.
-         *
-         *  K is the main loop index, decreasing from N to 1 in steps of
-         *  1 or 2, depending on the size of the diagonal blocks.
-         */
+
         k = N;
 
         while (k > 0) {
             if (ipiv[k - 1] > 0) {
-                /*
-                 *  1 x 1 diagonal block
-                 *
-                 *  Multiply by inv(L(K)), where L(K) is the transformation
-                 *  stored in column K of A.
-                 */
+
                 if (k < N) {
                     intTmp = N - k;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
                           A + k + (k - 1) * LDA, &intOne, &CONE, B + k - 1,
                           &LDB);
                 }
-                /*
-                 *  Interchange rows K and IPIV(K).
-                 */
+
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
                 }
                 k -= 1;
             } else {
-                /*
-                 *  2 x 2 diagonal block
-                 *
-                 *  Multiply by inv(L**T(K-1)), where L(K-1) is the
-                 * transformation stored in columns K-1 and K of A.
-                 */
+
                 if (k < N) {
                     intTmp = N - k;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
@@ -338,5 +253,4 @@ void SYTRS_ROOK(const char* uplo,
             }
         }
     }
-    // End of SYTRS_ROOK
 }

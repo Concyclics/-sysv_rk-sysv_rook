@@ -94,14 +94,8 @@ void SYSV_RK(const char* uplo,
         return;
     }
 
-    /*
-     *     Compute the factorization A = P*U*D*(U**T)*(P**T) or
-     *     A = P*U*D*(U**T)*(P**T).
-     */
-
     SYTRF_RK(uplo, n, a, lda, e, ipiv, work, lwork, info);
     if (*info == 0) {
-        // Solve the system A*X = B with BLAS3 solver, overwriting B with X.
         SYTRS_3(uplo, n, nrhs, a, lda, e, ipiv, b, ldb, info);
     }
 

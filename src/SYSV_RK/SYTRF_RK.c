@@ -249,5 +249,4 @@ void SYTRF_RK(const char* uplo,
     work[0] = (float)lwkopt;
     BlasSetNumThreads(max_threads);
     return;
-    // End of SSYTRF_RK
 }

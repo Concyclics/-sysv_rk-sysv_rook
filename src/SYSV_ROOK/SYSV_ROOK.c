@@ -19,9 +19,6 @@ void SYSV_ROOK(const char* uplo,
                const int* lwork,
                int* info) {
     int lwkopt;
-    /*
-     *     Test the input parameters.
-     */
     if (info == NULL) {
         int neg_info = 11;
 #ifdef SINGLE
@@ -91,11 +88,8 @@ void SYSV_ROOK(const char* uplo,
         return;
     }
 
-    // Compute the factorization A = U*D*U**T or A = L*D*L**T.
-
     SYTRF_ROOK(uplo, n, a, lda, ipiv, work, lwork, info);
     if (*info == 0) {
-        // Solve the system A*X = B with BLAS3 solver, overwriting B with X.
         SYTRS_ROOK(uplo, n, nrhs, a, lda, ipiv, b, ldb, info);
     }
     work[0] = lwkopt;

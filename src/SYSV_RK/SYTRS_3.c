@@ -105,17 +105,11 @@ void SYTRS_3(const char* uplo,
             }
         }
 
-/*
- *        Compute (U \P**T * B) -> B    [ (U \P**T * B) ]
- */
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "U", "N", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
         TRSM_("L", "U", "N", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        /*
-         *        Compute D \ B -> B   [ D \ (U \P**T * B) ]
-         */
 
         int cnt_pos = 0;
         int cnt_neg = 0;
@@ -158,9 +152,7 @@ void SYTRS_3(const char* uplo,
                 B[i - 1 + (j - 1) * LDB] = (akm1 * bk - bkm1) / deNom;
             }
         }
-/*
- *        Compute (U**T \ B) -> B   [ U**T \ (D \ (U \P**T * B) ) ]
- */
+
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "U", "T", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
@@ -238,17 +230,13 @@ void SYTRS_3(const char* uplo,
                 B[index[i] + k * LDB] = Btmp[i];
             }
         }
-/*
- *        Compute (L \P**T * B) -> B    [ (L \P**T * B) ]
- */
+
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "L", "N", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
         TRSM_("L", "L", "N", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        /*
-         *        Compute D \ B -> B   [ D \ (L \P**T * B) ]
-         */
+
         int cnt_pos = 0;
         int cnt_neg = 0;
         int pos_num[N];
@@ -282,7 +270,6 @@ void SYTRS_3(const char* uplo,
             akm1 = A[i - 1 + (i - 1) * LDA] / akm1k;
             ak = A[i + i * LDA] / akm1k;
             deNom = akm1 * ak - T_ONE;
-            //#pragma omp parallel for schedule(static) private(bkm1, bk)
             for (j = 1; j <= NRHS; j++) {
                 bkm1 = B[i - 1 + (j - 1) * LDB] / akm1k;
                 bk = B[i + (j - 1) * LDB] / akm1k;
@@ -290,9 +277,6 @@ void SYTRS_3(const char* uplo,
                 B[i + (j - 1) * LDB] = (akm1 * bk - bkm1) / deNom;
             }
         }
-/*
- *        Compute (L**T \ B) -> B   [ L**T \ (D \ (L \P**T * B) ) ]
- */
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "L", "T", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
@@ -333,12 +317,6 @@ void SYTRS_3(const char* uplo,
                 B[index[i] + k * LDB] = Btmp[i];
             }
         }
-        /*
-         *        END Lower
-         */
     }
     return;
-    /*
-     *     End of SSYTRS_3
-     */
 }
