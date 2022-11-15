@@ -16,6 +16,7 @@
 #include "ilaenv.h"
 #include "type.h"
 
+/*
 void SYTRF_ROOK(const char* uplo,
                 const int* n,
                 dataType* A,
@@ -24,3 +25,41 @@ void SYTRF_ROOK(const char* uplo,
                 dataType* work,
                 const int* lwork,
                 int* info);
+*/
+
+void ssytrf_rook_(const char* uplo,
+                    const int* n,
+                    float* A,
+                    const int* lda,
+                    int* ipiv,
+                    float* work,
+                    const int* lwork,
+                    int* info);
+
+void dsytrf_rook_(const char* uplo,
+                    const int* n,
+                    double* A,
+                    const int* lda,
+                    int* ipiv,
+                    double* work,
+                    const int* lwork,
+                    int* info);
+
+void csytrf_rook_(const char* uplo,
+                    const int* n,
+                    kml_complex_float* A,
+                    const int* lda,
+                    int* ipiv,
+                    kml_complex_float* work,
+                    const int* lwork,
+                    int* info);
+
+void zsytrf_rook_(const char* uplo,
+                    const int* n,
+                    kml_complex_double* A,
+                    const int* lda,
+                    int* ipiv,
+                    kml_complex_double* work,
+                    const int* lwork,
+                    int* info);
+                    

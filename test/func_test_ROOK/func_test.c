@@ -114,6 +114,8 @@ int cover() {
     // lwork<nb
     N = 20;
     SYTRF_ROOK(&UPLO, &N, A, &N, ipiv, W, &N, &info);
+    // lwork=-1
+    SYSV_ROOK(&UPLO, &N, &NRHS, A, &lda, ipiv, B1, &ldb, W, &neg_1, &info);
     // SYTRF parameter error
     char non_uplo = 'a';
     SYTRF_ROOK(&non_uplo, &N, A, &N, ipiv, W, &N, &info);
@@ -303,7 +305,7 @@ void exception_test(int N, int M) {
     // SYSV_RK(&uplo, &N, &NRHS, A, &N, E, ipiv, B, &N, W, &N, &info);	// our
     //  code
     int NRHS = N;
-    int neg = -1;
+    int neg = -2;
     char wronguplo = 'a';
     printf("test exception\n");
     // test exception
