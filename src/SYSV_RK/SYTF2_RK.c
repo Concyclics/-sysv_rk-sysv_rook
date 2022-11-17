@@ -52,16 +52,16 @@ void SYTF2_RK(const char* uplo,
     if (*info != 0) {
         int negInfo = -*info;
 #ifdef SINGLE
-        Xerbla("SSYTF2_RK", &negInfo, 7);
+        Xerbla("SSYTF2_RK", &negInfo, 9);
 #endif
 #ifdef DOUBLE
-        Xerbla("DSYTF2_RK", &negInfo, 7);
+        Xerbla("DSYTF2_RK", &negInfo, 9);
 #endif
 #ifdef COMPLEX
-        Xerbla("CSYTF2_RK", &negInfo, 7);
+        Xerbla("CSYTF2_RK", &negInfo, 9);
 #endif
 #ifdef COMPLEX16
-        Xerbla("ZSYTF2_RK", &negInfo, 7);
+        Xerbla("ZSYTF2_RK", &negInfo, 9);
 #endif
         return;
     }
@@ -89,7 +89,6 @@ void SYTF2_RK(const char* uplo,
             }
 
             if (MAX(absakk, colmax) == ZERO) {
-
                 if (*info == 0) {
                     *info = k;
                 }
@@ -98,7 +97,6 @@ void SYTF2_RK(const char* uplo,
                     E[k - 1] = ZERO;
                 }
             } else {
-
                 if (absakk >= ALPHA * colmax) {
                     kp = k;
                 } else {
@@ -127,13 +125,11 @@ void SYTF2_RK(const char* uplo,
 
                         if ((ABS_(A[imax - 1 + (imax - 1) * LDA]) >=
                              ALPHA * rowmax)) {
-
                             kp = imax;
                             done = true;
                         }
 
                         else if (p == jmax || rowmax <= colmax) {
-
                             kp = imax;
                             done = true;
                             kstep = 2;
@@ -145,7 +141,6 @@ void SYTF2_RK(const char* uplo,
                     }
                 }
                 if (kstep == 2 && p != k) {
-
                     if (p > 1) {
                         intTmp = p - 1;
                         SWAP_(&intTmp, A + (k - 1) * LDA, &intOne,
@@ -168,7 +163,6 @@ void SYTF2_RK(const char* uplo,
 
                 kk = k - kstep + 1;
                 if (kp != kk) {
-
                     if (kp > 1) {
                         intTmp = kp - 1;
                         SWAP_(&intTmp, A + (kk - 1) * LDA, &intOne,
@@ -194,7 +188,6 @@ void SYTF2_RK(const char* uplo,
                     }
                 }
                 if (kstep == 1) {
-
                     if (k > 1) {
                         if (ABS_(A[k - 1 + (k - 1) * LDA]) >= sfmin) {
                             d11 = T_ONE / A[k - 1 + (k - 1) * LDA];
@@ -228,7 +221,6 @@ void SYTF2_RK(const char* uplo,
                         E[k - 1] = ZERO;
                     }
                 } else {
-
                     if (k > 2) {
                         d12 = A[k - 2 + (k - 1) * LDA];
                         d22 = A[k - 2 + (k - 2) * LDA] / d12;
@@ -264,7 +256,6 @@ void SYTF2_RK(const char* uplo,
             k = k - kstep;
         }
     } else {
-
         E[N - 1] = ZERO;
 
         k = 1;
@@ -284,7 +275,6 @@ void SYTF2_RK(const char* uplo,
             }
 
             if (MAX(absakk, colmax) == ZERO) {
-
                 if (*info == 0) {
                     *info = k;
                 }
@@ -293,9 +283,7 @@ void SYTF2_RK(const char* uplo,
                     E[k - 1] = ZERO;
                 }
             } else {
-
                 if (absakk >= ALPHA * colmax) {
-
                     kp = k;
                 } else {
                     done = false;
@@ -324,11 +312,9 @@ void SYTF2_RK(const char* uplo,
 
                         if (ABS_(A[imax - 1 + (imax - 1) * LDA]) >=
                             ALPHA * rowmax) {
-
                             kp = imax;
                             done = true;
                         } else if (p == jmax || rowmax <= colmax) {
-
                             kp = imax;
                             kstep = 2;
                             done = true;
@@ -341,7 +327,6 @@ void SYTF2_RK(const char* uplo,
                 }
 
                 if (kstep == 2 && p != k) {
-
                     if (p < N) {
                         intTmp = N - p;
                         SWAP_(&intTmp, A + p + (k - 1) * LDA, &intOne,
@@ -364,7 +349,6 @@ void SYTF2_RK(const char* uplo,
 
                 kk = k + kstep - 1;
                 if (kp != kk) {
-
                     if (kp < N) {
                         intTmp = N - kp;
                         SWAP_(&intTmp, A + kp + (kk - 1) * LDA, &intOne,
@@ -392,9 +376,7 @@ void SYTF2_RK(const char* uplo,
 
                 if (kstep == 1) {
                     if (k < N) {
-
                         if (ABS_(A[k - 1 + (k - 1) * LDA]) >= sfmin) {
-
                             d11 = T_ONE / A[k - 1 + (k - 1) * LDA];
                             intTmp = N - k;
                             d11 = -d11;
@@ -425,7 +407,6 @@ void SYTF2_RK(const char* uplo,
                         E[k - 1] = ZERO;
                     }
                 } else {
-
                     if (k < N - 1) {
                         d21 = A[k + (k - 1) * LDA];
                         d11 = A[k + k * LDA] / d21;

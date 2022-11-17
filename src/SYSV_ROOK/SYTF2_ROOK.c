@@ -50,23 +50,22 @@ void SYTF2_ROOK(const char* uplo,
     if (*info != 0) {
         int neg_info = -*info;
 #ifdef SINGLE
-        Xerbla("SYTF2_ROOK", &neg_info, 7);
+        Xerbla("SSYTF2_ROOK", &neg_info, 11);
 #endif
 #ifdef DOUBLE
-        Xerbla("DYTF2_ROOK", &neg_info, 7);
+        Xerbla("DSYTF2_ROOK", &neg_info, 11);
 #endif
 #ifdef COMPLEX
-        Xerbla("CYTF2_ROOK", &neg_info, 7);
+        Xerbla("CSYTF2_ROOK", &neg_info, 11);
 #endif
 #ifdef COMPLEX16
-        Xerbla("ZYTF2_ROOK", &neg_info, 7);
+        Xerbla("ZSYTF2_ROOK", &neg_info, 11);
 #endif
         return;
     }
 
     sfMin = lamch_("S");
     if (upper) {
-
         k = N;
 
         while (k > 0) {
@@ -89,14 +88,11 @@ void SYTF2_ROOK(const char* uplo,
                 }
                 kp = k;
             } else {
-
                 if (absAkk >= Alpha * colMax) {
-
                     kp = k;
                 } else {
                     done = false;
                     while (!done) {
-
                         if (iMax != k) {
                             intTmp = k - iMax;
                             jMax = iMax + I_AMAX(&intTmp,
@@ -119,18 +115,15 @@ void SYTF2_ROOK(const char* uplo,
 
                         if ((ABS_(A[iMax - 1 + (iMax - 1) * (LDA)]) >=
                              Alpha * rowMax)) {
-
                             kp = iMax;
                             done = true;
                         }
 
                         else if (p == jMax || rowMax <= colMax) {
-
                             kp = iMax;
                             kStep = 2;
                             done = true;
                         } else {
-
                             p = iMax;
                             colMax = rowMax;
                             iMax = jMax;
@@ -156,7 +149,6 @@ void SYTF2_ROOK(const char* uplo,
 
                 kk = k - kStep + 1;
                 if (kp != kk) {
-
                     if (kp > 1) {
                         intTmp = kp - 1;
                         SWAP_(&intTmp, A + (kk - 1) * (LDA), &intOne,
@@ -239,7 +231,6 @@ void SYTF2_ROOK(const char* uplo,
             k = k - kStep;
         }
     } else {
-
         k = 1;
 
         while (k <= N) {
@@ -255,20 +246,16 @@ void SYTF2_ROOK(const char* uplo,
             }
 
             if (MAX(absAkk, colMax) == ZERO) {
-
                 if (*info == 0) {
                     *info = k;
                 }
                 kp = k;
             } else {
-
                 if (absAkk >= Alpha * colMax) {
-
                     kp = k;
                 } else {
                     done = false;
                     while (!done) {
-
                         if (iMax != k) {
                             intTmp = iMax - k;
                             jMax = k - 1 +
@@ -344,7 +331,6 @@ void SYTF2_ROOK(const char* uplo,
                 }
                 if (kStep == 1) {
                     if (k < N) {
-
                         if (ABS_(A[k - 1 + (k - 1) * (LDA)]) >= sfMin) {
                             d11 = T_ONE / A[k - 1 + (k - 1) * (LDA)];
                             d11 = -d11;

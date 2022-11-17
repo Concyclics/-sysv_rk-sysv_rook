@@ -60,7 +60,7 @@ void SYTRF_RK(const char* uplo,
 
     if (*info != 0) {
         int negInfo = -*info;
-        Xerbla(name, &negInfo, 8);
+        Xerbla(name, &negInfo, 9);
         return;
     } else if (lQuery) {
         return;

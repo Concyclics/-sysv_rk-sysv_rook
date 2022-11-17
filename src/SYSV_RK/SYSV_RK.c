@@ -26,16 +26,16 @@ void SYSV_RK(const char* uplo,
     if (info == NULL) {
         int neg_info = 12;
 #ifdef SINGLE
-        Xerbla("ssysv_rk", &neg_info, 12);
+        Xerbla("ssysv_rk", &neg_info, 8);
 #endif
 #ifdef DOUBLE
-        Xerbla("dsysv_rk", &neg_info, 12);
+        Xerbla("dsysv_rk", &neg_info, 8);
 #endif
 #ifdef COMPLEX
-        Xerbla("csysv_rk", &neg_info, 12);
+        Xerbla("csysv_rk", &neg_info, 8);
 #endif
 #ifdef COMPLEX16
-        Xerbla("zsysv_rk", &neg_info, 12);
+        Xerbla("zsysv_rk", &neg_info, 8);
 #endif
         return;
     }
@@ -78,16 +78,16 @@ void SYSV_RK(const char* uplo,
     if (*info != 0) {
         int neg_info = -*info;
 #ifdef SINGLE
-        Xerbla("ssysv_rk", &neg_info, 12);
+        Xerbla("ssysv_rk", &neg_info, 8);
 #endif
 #ifdef DOUBLE
-        Xerbla("dsysv_rk", &neg_info, 12);
+        Xerbla("dsysv_rk", &neg_info, 8);
 #endif
 #ifdef COMPLEX
-        Xerbla("csysv_rk", &neg_info, 12);
+        Xerbla("csysv_rk", &neg_info, 8);
 #endif
 #ifdef COMPLEX16
-        Xerbla("zsysv_rk", &neg_info, 12);
+        Xerbla("zsysv_rk", &neg_info, 8);
 #endif
         return;
     } else if (*lwork == -1) {

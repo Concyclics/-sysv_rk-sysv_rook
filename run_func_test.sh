@@ -5,7 +5,7 @@ bash build.sh 2
 bash build_test.sh
 
 export ASAN_OPTIONS=log_path=./asan.log:detect_leaks=1
-export OMP_NUM_THREADS=48
+export OMP_NUM_THREADS=32
 #export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
 
 echo "Running functional tests"
@@ -17,7 +17,7 @@ do
     ./test/func_test_RK/func_test_RK_$type.o N
     ./test/func_test_RK/func_test_RK_$type.o E
     ./test/func_test_RK/func_test_RK_$type.o C
-
+:<<BLOCK
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"
@@ -78,6 +78,7 @@ do
         ./test/func_test_RK/generate_func_test_RK_$type.o S $N $NRHS $UPLO
         ./test/func_test_RK/func_test_RK_$type.o S $N $NRHS $UPLO
     done
+BLOCK
 done
 
 
@@ -89,7 +90,7 @@ do
     ./test/func_test_ROOK/func_test_ROOK_$type.o N
     ./test/func_test_ROOK/func_test_ROOK_$type.o E
     ./test/func_test_ROOK/func_test_ROOK_$type.o C
-
+:<<BLOCK
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"
@@ -150,4 +151,5 @@ do
         ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S $N $NRHS $UPLO
         ./test/func_test_ROOK/func_test_ROOK_$type.o S $N $NRHS $UPLO
     done
+BLOCK
 done

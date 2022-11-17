@@ -22,16 +22,16 @@ void SYSV_ROOK(const char* uplo,
     if (info == NULL) {
         int neg_info = 11;
 #ifdef SINGLE
-        Xerbla("ssysv_rk", &neg_info, 12);
+        Xerbla("ssysv_rook", &neg_info, 12);
 #endif
 #ifdef DOUBLE
-        Xerbla("dsysv_rk", &neg_info, 12);
+        Xerbla("dsysv_rook", &neg_info, 12);
 #endif
 #ifdef COMPLEX
-        Xerbla("csysv_rk", &neg_info, 12);
+        Xerbla("csysv_rook", &neg_info, 12);
 #endif
 #ifdef COMPLEX16
-        Xerbla("zsysv_rk", &neg_info, 12);
+        Xerbla("zsysv_rook", &neg_info, 12);
 #endif
         return;
     }
@@ -72,16 +72,16 @@ void SYSV_ROOK(const char* uplo,
     if (*info != 0) {
         int neg_info = -*info;
 #ifdef SINGLE
-        Xerbla("ssysv_rook", &neg_info, 11);
+        Xerbla("ssysv_rook", &neg_info, 10);
 #endif
 #ifdef DOUBLE
-        Xerbla("dsysv_rook", &neg_info, 11);
+        Xerbla("dsysv_rook", &neg_info, 10);
 #endif
 #ifdef COMPLEX
-        Xerbla("csysv_rook", &neg_info, 11);
+        Xerbla("csysv_rook", &neg_info, 10);
 #endif
 #ifdef COMPLEX16
-        Xerbla("zsysv_rook", &neg_info, 11);
+        Xerbla("zsysv_rook", &neg_info, 10);
 #endif
         return;
     } else if (*lwork == -1) {

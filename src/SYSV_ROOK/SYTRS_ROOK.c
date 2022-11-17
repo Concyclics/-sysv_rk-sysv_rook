@@ -44,16 +44,16 @@ void SYTRS_ROOK(const char* uplo,
     int neg_info = -*info;
     if (*info != 0) {
 #ifdef SINGLE
-        Xerbla("SYTRS_ROOK", &neg_info, 10);
+        Xerbla("SSYTRS_ROOK", &neg_info, 11);
 #endif
 #ifdef DOUBLE
-        Xerbla("DYTRS_ROOK", &neg_info, 10);
+        Xerbla("DSYTRS_ROOK", &neg_info, 11);
 #endif
 #ifdef COMPLEX
-        Xerbla("CYTRS_ROOK", &neg_info, 10);
+        Xerbla("CSYTRS_ROOK", &neg_info, 11);
 #endif
 #ifdef COMPLEX16
-        Xerbla("ZYTRS_ROOK", &neg_info, 10);
+        Xerbla("ZSYTRS_ROOK", &neg_info, 11);
 #endif
         return;
     }
@@ -69,7 +69,6 @@ void SYTRS_ROOK(const char* uplo,
         k = N;
         while (k > 0) {
             if (ipiv[k - 1] > 0) {
-
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -87,7 +86,6 @@ void SYTRS_ROOK(const char* uplo,
 #endif
                 k -= 1;
             } else {
-
                 kp = -ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -123,7 +121,6 @@ void SYTRS_ROOK(const char* uplo,
 
         while (k <= N) {
             if (ipiv[k - 1] > 0) {
-
                 if (k > 1) {
                     intTmp = k - 1;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
@@ -136,7 +133,6 @@ void SYTRS_ROOK(const char* uplo,
                 }
                 k += 1;
             } else {
-
                 if (k > 1) {
                     intTmp = k - 1;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
@@ -157,11 +153,9 @@ void SYTRS_ROOK(const char* uplo,
             }
         }
     } else {
-
         k = 1;
         while (k <= N) {
             if (ipiv[k - 1] > 0) {
-
                 kp = ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -181,7 +175,6 @@ void SYTRS_ROOK(const char* uplo,
 #endif
                 k += 1;
             } else {
-
                 kp = -ipiv[k - 1];
                 if (kp != k) {
                     SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
@@ -217,7 +210,6 @@ void SYTRS_ROOK(const char* uplo,
 
         while (k > 0) {
             if (ipiv[k - 1] > 0) {
-
                 if (k < N) {
                     intTmp = N - k;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
@@ -231,7 +223,6 @@ void SYTRS_ROOK(const char* uplo,
                 }
                 k -= 1;
             } else {
-
                 if (k < N) {
                     intTmp = N - k;
                     GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
