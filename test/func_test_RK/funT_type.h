@@ -17,6 +17,8 @@ typedef float funcTdataType;
 #define _CreatMatrix sCreatMatrix
 #define _FuncTest sFuncTest
 #define _pot02_ spot02_
+#define _get04_ sget04_
+#define _gemm_ sgemm_
 #endif
 #ifdef DOUBLE
 #define TestTypeName DOUBLE
@@ -26,6 +28,8 @@ typedef double funcTdataType;
 #define _CreatMatrix dCreatMatrix
 #define _FuncTest dFuncTest
 #define _pot02_ dpot02_
+#define _get04_ dget04_
+#define _gemm_ dgemm_
 #endif
 #ifdef COMPLEX
 #define TestTypeName COMPLEX
@@ -35,6 +39,8 @@ typedef float complex funcTdataType;
 #define _CreatMatrix cCreatMatrix
 #define _FuncTest cFuncTest
 #define _pot02_ csyt02_
+#define _get04_ cget04_
+#define _gemm_ cgemm_
 #endif
 #ifdef COMPLEX16
 #define TestTypeName COMPLEX16
@@ -44,4 +50,7 @@ typedef double complex funcTdataType;
 #define _CreatMatrix zCreatMatrix
 #define _FuncTest zFuncTest
 #define _pot02_ zsyt02_
+#define _get04_ zget04_
+#define _gemm_ zgemm_
 #endif
+

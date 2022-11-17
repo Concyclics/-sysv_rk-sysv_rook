@@ -17,7 +17,7 @@ do
     ./test/func_test_RK/func_test_RK_$type.o N
     ./test/func_test_RK/func_test_RK_$type.o E
     ./test/func_test_RK/func_test_RK_$type.o C
-:<<BLOCK
+
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"
@@ -78,7 +78,6 @@ do
         ./test/func_test_RK/generate_func_test_RK_$type.o S $N $NRHS $UPLO
         ./test/func_test_RK/func_test_RK_$type.o S $N $NRHS $UPLO
     done
-BLOCK
 done
 
 
@@ -90,7 +89,7 @@ do
     ./test/func_test_ROOK/func_test_ROOK_$type.o N
     ./test/func_test_ROOK/func_test_ROOK_$type.o E
     ./test/func_test_ROOK/func_test_ROOK_$type.o C
-:<<BLOCK
+
     echo 'test small'
     ((time=$RANDOM%11+20))
     echo "test time = $time"
@@ -151,5 +150,4 @@ do
         ./test/func_test_ROOK/generate_func_test_ROOK_$type.o S $N $NRHS $UPLO
         ./test/func_test_ROOK/func_test_ROOK_$type.o S $N $NRHS $UPLO
     done
-BLOCK
 done

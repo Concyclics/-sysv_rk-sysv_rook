@@ -572,3 +572,324 @@
 *
       END
 
+      SUBROUTINE sget04( N, NRHS, X, LDX, XACT, LDXACT, RCOND, RESID )
+*
+*  -- LAPACK test routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      INTEGER            LDX, LDXACT, N, NRHS
+      REAL               RCOND, RESID
+*     ..
+*     .. Array Arguments ..
+      REAL               X( LDX, * ), XACT( LDXACT, * )
+*     ..
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      REAL               ZERO
+      parameter( zero = 0.0e+0 )
+*     ..
+*     .. Local Scalars ..
+      INTEGER            I, IX, J
+      REAL               DIFFNM, EPS, XNORM
+*     ..
+*     .. External Functions ..
+      INTEGER            ISAMAX
+      REAL               SLAMCH
+      EXTERNAL           isamax, slamch
+*     ..
+*     .. Intrinsic Functions ..
+      INTRINSIC          abs, max
+*     ..
+*     .. Executable Statements ..
+*
+*     Quick exit if N = 0 or NRHS = 0.
+*
+      IF( n.LE.0 .OR. nrhs.LE.0 ) THEN
+         resid = zero
+         RETURN
+      END IF
+*
+*     Exit with RESID = 1/EPS if RCOND is invalid.
+*
+      eps = slamch( 'Epsilon' )
+      IF( rcond.LT.zero ) THEN
+         resid = 1.0 / eps
+         RETURN
+      END IF
+*
+*     Compute the maximum of
+*        norm(X - XACT) / ( norm(XACT) * EPS )
+*     over all the vectors X and XACT .
+*
+      resid = zero
+      DO 20 j = 1, nrhs
+         ix = isamax( n, xact( 1, j ), 1 )
+         xnorm = abs( xact( ix, j ) )
+         diffnm = zero
+         DO 10 i = 1, n
+            diffnm = max( diffnm, abs( x( i, j )-xact( i, j ) ) )
+   10    CONTINUE
+         IF( xnorm.LE.zero ) THEN
+            IF( diffnm.GT.zero )
+     $         resid = 1.0 / eps
+         ELSE
+            resid = max( resid, ( diffnm / xnorm )*rcond )
+         END IF
+   20 CONTINUE
+      IF( resid*eps.LT.1.0 )
+     $   resid = resid / eps
+*
+      RETURN
+*
+*     End of SGET04
+*
+      END
+
+      SUBROUTINE dget04( N, NRHS, X, LDX, XACT, LDXACT, RCOND, RESID )
+*
+*  -- LAPACK test routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      INTEGER            LDX, LDXACT, N, NRHS
+      DOUBLE PRECISION   RCOND, RESID
+*     ..
+*     .. Array Arguments ..
+      DOUBLE PRECISION   X( LDX, * ), XACT( LDXACT, * )
+*     ..
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      DOUBLE PRECISION   ZERO
+      parameter( zero = 0.0d+0 )
+*     ..
+*     .. Local Scalars ..
+      INTEGER            I, IX, J
+      DOUBLE PRECISION   DIFFNM, EPS, XNORM
+*     ..
+*     .. External Functions ..
+      INTEGER            IDAMAX
+      DOUBLE PRECISION   DLAMCH
+      EXTERNAL           idamax, dlamch
+*     ..
+*     .. Intrinsic Functions ..
+      INTRINSIC          abs, max
+*     ..
+*     .. Executable Statements ..
+*
+*     Quick exit if N = 0 or NRHS = 0.
+*
+      IF( n.LE.0 .OR. nrhs.LE.0 ) THEN
+         resid = zero
+         RETURN
+      END IF
+*
+*     Exit with RESID = 1/EPS if RCOND is invalid.
+*
+      eps = dlamch( 'Epsilon' )
+      IF( rcond.LT.zero ) THEN
+         resid = 1.0d0 / eps
+         RETURN
+      END IF
+*
+*     Compute the maximum of
+*        norm(X - XACT) / ( norm(XACT) * EPS )
+*     over all the vectors X and XACT .
+*
+      resid = zero
+      DO 20 j = 1, nrhs
+         ix = idamax( n, xact( 1, j ), 1 )
+         xnorm = abs( xact( ix, j ) )
+         diffnm = zero
+         DO 10 i = 1, n
+            diffnm = max( diffnm, abs( x( i, j )-xact( i, j ) ) )
+   10    CONTINUE
+         IF( xnorm.LE.zero ) THEN
+            IF( diffnm.GT.zero )
+     $         resid = 1.0d0 / eps
+         ELSE
+            resid = max( resid, ( diffnm / xnorm )*rcond )
+         END IF
+   20 CONTINUE
+      IF( resid*eps.LT.1.0d0 )
+     $   resid = resid / eps
+*
+      RETURN
+*
+*     End of DGET04
+*
+      END
+
+      SUBROUTINE cget04( N, NRHS, X, LDX, XACT, LDXACT, RCOND, RESID )
+*
+*  -- LAPACK test routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      INTEGER            LDX, LDXACT, N, NRHS
+      REAL               RCOND, RESID
+*     ..
+*     .. Array Arguments ..
+      COMPLEX            X( LDX, * ), XACT( LDXACT, * )
+*     ..
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      REAL               ZERO
+      parameter( zero = 0.0e+0 )
+*     ..
+*     .. Local Scalars ..
+      INTEGER            I, IX, J
+      REAL               DIFFNM, EPS, XNORM
+      COMPLEX            ZDUM
+*     ..
+*     .. External Functions ..
+      INTEGER            ICAMAX
+      REAL               SLAMCH
+      EXTERNAL           icamax, slamch
+*     ..
+*     .. Intrinsic Functions ..
+      INTRINSIC          abs, aimag, max, real
+*     ..
+*     .. Statement Functions ..
+      REAL               CABS1
+*     ..
+*     .. Statement Function definitions ..
+      cabs1( zdum ) = abs( real( zdum ) ) + abs( aimag( zdum ) )
+*     ..
+*     .. Executable Statements ..
+*
+*     Quick exit if N = 0 or NRHS = 0.
+*
+      IF( n.LE.0 .OR. nrhs.LE.0 ) THEN
+         resid = zero
+         RETURN
+      END IF
+*
+*     Exit with RESID = 1/EPS if RCOND is invalid.
+*
+      eps = slamch( 'Epsilon' )
+      IF( rcond.LT.zero ) THEN
+         resid = 1.0 / eps
+         RETURN
+      END IF
+*
+*     Compute the maximum of
+*        norm(X - XACT) / ( norm(XACT) * EPS )
+*     over all the vectors X and XACT .
+*
+      resid = zero
+      DO 20 j = 1, nrhs
+         ix = icamax( n, xact( 1, j ), 1 )
+         xnorm = cabs1( xact( ix, j ) )
+         diffnm = zero
+         DO 10 i = 1, n
+            diffnm = max( diffnm, cabs1( x( i, j )-xact( i, j ) ) )
+   10    CONTINUE
+         IF( xnorm.LE.zero ) THEN
+            IF( diffnm.GT.zero )
+     $         resid = 1.0 / eps
+         ELSE
+            resid = max( resid, ( diffnm / xnorm )*rcond )
+         END IF
+   20 CONTINUE
+      IF( resid*eps.LT.1.0 )
+     $   resid = resid / eps
+*
+      RETURN
+*
+*     End of CGET04
+*
+      END
+
+      SUBROUTINE zget04( N, NRHS, X, LDX, XACT, LDXACT, RCOND, RESID )
+*
+*  -- LAPACK test routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      INTEGER            LDX, LDXACT, N, NRHS
+      DOUBLE PRECISION   RCOND, RESID
+*     ..
+*     .. Array Arguments ..
+      COMPLEX*16         X( LDX, * ), XACT( LDXACT, * )
+*     ..
+*
+*  =====================================================================
+*
+*     .. Parameters ..
+      DOUBLE PRECISION   ZERO
+      parameter( zero = 0.0d+0 )
+*     ..
+*     .. Local Scalars ..
+      INTEGER            I, IX, J
+      DOUBLE PRECISION   DIFFNM, EPS, XNORM
+      COMPLEX*16         ZDUM
+*     ..
+*     .. External Functions ..
+      INTEGER            IZAMAX
+      DOUBLE PRECISION   DLAMCH
+      EXTERNAL           izamax, dlamch
+*     ..
+*     .. Intrinsic Functions ..
+      INTRINSIC          abs, dble, dimag, max
+*     ..
+*     .. Statement Functions ..
+      DOUBLE PRECISION   CABS1
+*     ..
+*     .. Statement Function definitions ..
+      cabs1( zdum ) = abs( dble( zdum ) ) + abs( dimag( zdum ) )
+*     ..
+*     .. Executable Statements ..
+*
+*     Quick exit if N = 0 or NRHS = 0.
+*
+      IF( n.LE.0 .OR. nrhs.LE.0 ) THEN
+         resid = zero
+         RETURN
+      END IF
+*
+*     Exit with RESID = 1/EPS if RCOND is invalid.
+*
+      eps = dlamch( 'Epsilon' )
+      IF( rcond.LT.zero ) THEN
+         resid = 1.0d0 / eps
+         RETURN
+      END IF
+*
+*     Compute the maximum of
+*        norm(X - XACT) / ( norm(XACT) * EPS )
+*     over all the vectors X and XACT .
+*
+      resid = zero
+      DO 20 j = 1, nrhs
+         ix = izamax( n, xact( 1, j ), 1 )
+         xnorm = cabs1( xact( ix, j ) )
+         diffnm = zero
+         DO 10 i = 1, n
+            diffnm = max( diffnm, cabs1( x( i, j )-xact( i, j ) ) )
+   10    CONTINUE
+         IF( xnorm.LE.zero ) THEN
+            IF( diffnm.GT.zero )
+     $         resid = 1.0d0 / eps
+         ELSE
+            resid = max( resid, ( diffnm / xnorm )*rcond )
+         END IF
+   20 CONTINUE
+      IF( resid*eps.LT.1.0d0 )
+     $   resid = resid / eps
+*
+      RETURN
+*
+*     End of ZGET04
+*
+      END

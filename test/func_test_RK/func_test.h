@@ -46,6 +46,19 @@ double _TestWithSeed(int rand_seed,
                      funcTdataAccu* W1,
                      int* ipiv);
 
+double _TestWithSeedGet04(int rand_seed,
+                          int N,
+                          int NRHS,
+                          char uplo,
+                          funcTdataType* A,
+                          funcTdataType* A1,
+                          funcTdataType* E,
+                          funcTdataType* XACT,
+                          funcTdataType* B,
+                          funcTdataType* W,
+                          funcTdataAccu* W1,
+                          int* ipiv);
+
 void _pot02_(const char* uplo,
              const int* n,
              const int* nrhs,
@@ -56,6 +69,16 @@ void _pot02_(const char* uplo,
              funcTdataType* b,
              const int* ldb,
              funcTdataAccu* rwork,
+             funcTdataAccu* resid);
+
+
+void _get04_(const int* n,
+             const int* nrhs,
+             funcTdataType* x,
+             const int* ldx,
+             funcTdataType* xact,
+             const int* ldxact,
+             funcTdataAccu* rcond,
              funcTdataAccu* resid);
 
 void _sysv_rk_(const char* uplo,

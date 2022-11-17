@@ -73,6 +73,8 @@ int main(int argc, char* argv[]) {
     freopen("seeds_answers_TestTypeName.txt", "w", stdout);
     result = _TestWithSeed(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
     printf("%d %f\n", seed, result);
+    result = _TestWithSeedGet04(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
+    printf("%d %f\n", seed, result);
     fclose(stdout);
 #else
 
@@ -81,6 +83,17 @@ int main(int argc, char* argv[]) {
     double result_OS, result_US;
     scanf("%d %lf", &seed, &result_OS);
     result_US = _TestWithSeed(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
+    printf("test pot02\n");
+    printf("test N = %d, NRHS = %d, UPLO = %c\n", N, NRHS, UPLO);
+    printf("result_OS = %f, result_US = %f\n", result_OS, result_US);
+    if (result_OS > result_US) {
+        printf("success!\n");
+    } else {
+        printf("fail!\n");
+    }
+    scanf("%d %lf", &seed, &result_OS);
+    result_US = _TestWithSeedGet04(seed, N, NRHS, UPLO, A, A1, B1, B3, W, W1, ipiv);
+    printf("test get04\n");
     printf("test N = %d, NRHS = %d, UPLO = %c\n", N, NRHS, UPLO);
     printf("result_OS = %f, result_US = %f\n", result_OS, result_US);
     if (result_OS > result_US) {

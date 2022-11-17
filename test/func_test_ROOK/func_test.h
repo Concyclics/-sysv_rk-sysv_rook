@@ -33,6 +33,18 @@ double _TestWithSeed(int rand_seed,
                      funcTdataType* W,
                      funcTdataAccu* W1,
                      int* ipiv);
+
+double _TestWithSeedGet04(int rand_seed,
+                          int N,
+                          int NRHS,
+                          char uplo,
+                          funcTdataType* A,
+                          funcTdataType* A1,
+                          funcTdataType* XACT,
+                          funcTdataType* B,
+                          funcTdataType* W,
+                          funcTdataAccu* W1,
+                          int* ipiv);
 /**
  * ////////////////////////////////_pot02_///////////////////////////////////////
  * @Brief Computes the residual for the solution of a symmetric system of linear
@@ -74,6 +86,14 @@ void _pot02_(const char* uplo,
              funcTdataAccu* rwork,
              funcTdataAccu* resid);
 
+void _get04_(const int* n,
+             const int* nrhs,
+             funcTdataType* x,
+             const int* ldx,
+             funcTdataType* b,
+             const int* ldb,
+             funcTdataAccu* rcond,
+             funcTdataAccu* resid);
 /**
  * ////////////////////////////////_sysv_rook_///////////////////////////////////////
  * @Brief Computes the residual for the solution of a symmetric system of linear

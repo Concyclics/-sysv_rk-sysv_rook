@@ -45,6 +45,60 @@ double _TestWithSeed(int rand_seed,
     return RESID;
 }
 
+double _TestWithSeedGet04(int rand_seed,
+                          int N,
+                          int NRHS,
+                          char uplo,
+                          funcTdataType* A,
+                          funcTdataType* A1,
+                          funcTdataType* XACT,
+                          funcTdataType* B,
+                          funcTdataType* W,
+                          funcTdataAccu* W1,
+                          int* ipiv) {
+    srand(rand_seed);
+
+    int size = sizeof(funcTdataType);
+
+    int info;
+
+    funcTdataAccu RESID, RCOND;
+    RCOND = 1.0 / (funcTdataAccu)NRHS/N;
+    int lwork = N * 64;
+
+    // printf("  UPLO = %c\n", uplo);
+    _CreatMatrix(uplo, N, NRHS, A, XACT);
+
+    if (uplo == 'L') {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < i; ++j) {
+                A[i * N + j] = A[j * N + i];
+            }
+        }
+    } else {
+        for (int i = 0; i < N; ++i) {
+            for (int j = i + 1; j < N; ++j) {
+                A[i * N + j] = A[j * N + i];
+            }
+        }
+    }
+
+    // B = A*X
+    funcTdataType alpha = 1.0;
+    funcTdataType beta = 0.0;
+
+    // copy A to A1.
+    for (int j = 0; j < N * N; ++j) {
+        A1[j] = A[j];
+    }
+
+     _gemm_("N", "N", &N, &NRHS, &N, &alpha, A, &N, XACT, &N, &beta, B, &N);
+    SYSV_ROOK(&uplo, &N, &NRHS, A1, &N, ipiv, B, &N, W, &lwork,
+              &info);  // lapack code
+    _get04_(&N, &NRHS, B, &N, XACT, &N, &RCOND, &RESID);  // lapack code
+    return RESID;
+}
+
 int cover() {
     int N, NRHS, NB;
     char UPLO;
