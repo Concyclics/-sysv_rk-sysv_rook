@@ -7,6 +7,30 @@
 
 #include "func_test.h"
 
+double calc_rcond(char uplo,
+                  int n,
+                  funcTdataType* A,
+                  int lda,
+                int* ipiv){
+    funcTdataAccu anorm;
+    funcTdataAccu rcond;
+    int info;
+    funcTdataAccu work[2 * n];
+    funcTdataType W1[2 * n];
+    int iwork[n];
+    anorm = _lansy_("I", &uplo, &n, A, &lda, work);
+    #if defined(SINGLE)
+        ssycon_(&uplo, &n, A, &lda, ipiv, &anorm, &rcond, W1, iwork, &info);
+    #elif defined(DOUBLE)
+        dsycon_(&uplo, &n, A, &lda, ipiv, &anorm, &rcond, W1, iwork, &info);
+    #elif defined(COMPLEX)
+        csycon_(&uplo, &n, A, &lda, ipiv, &anorm, &rcond, W1, &info);
+    #elif defined(COMPLEX16)
+        zsycon_(&uplo, &n, A, &lda, ipiv, &anorm, &rcond, W1, &info);
+    #endif
+    return rcond;
+}
+
 double _TestWithSeed(int rand_seed,
                      int N,
                      int NRHS,
@@ -64,11 +88,20 @@ double _TestWithSeedGet04(int rand_seed,
 
     int info;
     funcTdataAccu RESID, RCOND;
-    RCOND = 1.0 / (funcTdataAccu)NRHS/N;
     int lwork = N * 64;
 
     // printf("  UPLO = %c\n", uplo);
     _CreatMatrix(uplo, N, NRHS, A, XACT);
+
+    funcTdataType* Af = (funcTdataType*)malloc(N * N * size);
+    for (int j = 0; j < N * N; ++j) {
+        Af[j] = A[j];
+    }
+
+    _sytrf_(&uplo, &N, Af, &N, ipiv, W, &N, &info);
+    printf("info = %d\n", info);
+    RCOND = calc_rcond(uplo, N, Af, N, ipiv);
+    free(Af);
 
     if (uplo == 'L') {
         for (int i = 0; i < N; ++i) {

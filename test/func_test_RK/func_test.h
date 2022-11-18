@@ -31,7 +31,71 @@ void _FuncTest(int times,
                funcTdataAccu* W1,
                int* ipiv);
 
+extern void _sytrf_(char* UPLO,
+                    int* N,
+                    funcTdataType* A,
+                    int* LDA,
+                    int* IPIV,
+                    funcTdataType* WORK,
+                    int* LWORK,
+                    int* INFO);
+
 int cover();
+
+double calc_rcond(char uplo,
+                  int n,
+                  funcTdataType* A,
+                  int lda,
+                  int *ipiv);
+
+dataAccu _lansy_(char* norm,
+                 char* uplo,
+                 int* n,
+                 funcTdataType* A,
+                 int* lda,
+                 funcTdataAccu* work);
+
+void ssycon_(char* uplo,
+             int* n,
+             float* A,
+             int* lda,
+             int* ipiv,
+             float* anorm,
+             float* rcond,
+             float* work,
+             int* iwork,
+             int* info);
+
+void dsycon_(char* uplo,
+             int* n,
+                double* A,  
+                int* lda,
+                int* ipiv,
+                double* anorm,
+                double* rcond,
+                double* work,
+                int* iwork,
+                int* info);
+
+void csycon_(char* uplo,
+                int* n,
+                float complex* A,
+                int* lda,
+                int* ipiv,
+                float* anorm,
+                float* rcond,
+                float complex* work,
+                int* info);
+
+void zsycon_(char* uplo,
+                int* n,
+                double complex* A,
+                int* lda,
+                int* ipiv,
+                double* anorm,
+                double* rcond,
+                double complex* work,
+                int* info);
 
 double _TestWithSeed(int rand_seed,
                      int N,
@@ -70,7 +134,6 @@ void _pot02_(const char* uplo,
              const int* ldb,
              funcTdataAccu* rwork,
              funcTdataAccu* resid);
-
 
 void _get04_(const int* n,
              const int* nrhs,
