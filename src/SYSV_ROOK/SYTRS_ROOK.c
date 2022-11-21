@@ -4,8 +4,9 @@
  * Author: CHEN Han
  * Create: 2022-06-27
  *******************************************************************************/
-
 #include "SYTRS_ROOK.h"
+#include <stdio.h>
+#include <sys/time.h>
 void SYTRS_ROOK(const char* uplo,
                 const int* n,
                 const int* nrhs,
@@ -19,7 +20,8 @@ void SYTRS_ROOK(const char* uplo,
     const dataType NEG_CONE = -1;
     const int intOne = 1;
     int intTmp;
-
+    struct timeval tvStart, tvEnd;
+    struct timezone tzStart, tzEnd;
     const int N = *n;
     const int NRHS = *nrhs;
     const int LDA = *lda;
@@ -27,6 +29,11 @@ void SYTRS_ROOK(const char* uplo,
     int upper;
     int i, j, k, kp;
     dataType ak, akm1, akm1k, bk, bkm1, deNom;
+
+    int numThread = 32;
+    int step = NRHS / numThread;
+    int last = (numThread - 1) * step;
+    int length;
 
     *info = 0;
     upper = KmlLsame(*uplo, 'U');
@@ -66,181 +73,245 @@ void SYTRS_ROOK(const char* uplo,
     }
 
     if (upper) {
-        k = N;
-        while (k > 0) {
-            if (ipiv[k - 1] > 0) {
-                kp = ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-
-                intTmp = k - 1;
-                GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 1) * LDA, &intOne,
-                     B + (k - 1), &LDB, B, &LDB);
-
-                dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
+        gettimeofday(&tvStart, &tzStart);
+#pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
+                                 intTmp, length, k)
+        for (i = 0; i < numThread; i++) {
+            k = N;
+            if (i < numThread - 1) {
+                length = step;
+            } else {
+                length = NRHS - last;
+            }
+            while (k > 0) {
+                if (ipiv[k - 1] > 0) {
+                    kp = ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + k - 1 + i * step * LDB, ldb,
+                              B + kp - 1 + i * step * LDB, ldb);
+                    }
+                    intTmp = k - 1;
+                    GER_(&intTmp, &length, &NEG_CONE, A + (k - 1) * LDA,
+                         &intOne, B + k - 1 + i * step * LDB, ldb,
+                         B + i * step * LDB, ldb);
+                    dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
 #if defined(COMPLEX) || defined(COMPLEX16)
-                SCAL_(&NRHS, (void*)&ALPHA_, B + k - 1, &LDB);
+                    SCAL_(&length, (void*)&ALPHA_, B + k - 1 + i * step * LDB,
+                          ldb);
 #else
-                SCAL_(&NRHS, &ALPHA_, B + k - 1, &LDB);
+                    SCAL_(&length, &ALPHA_, B + k - 1 + i * step * LDB, ldb);
 #endif
-                k -= 1;
-            } else {
-                kp = -ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-                kp = -ipiv[k - 2];
-                if (kp != k - 1) {
-                    SWAP_(&NRHS, B + (k - 2), &LDB, B + (kp - 1), &LDB);
-                }
 
-                if (k > 2) {
-                    intTmp = k - 2;
-                    GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 1) * LDA, &intOne,
-                         B + (k - 1), &LDB, B, &LDB);
-                    GER_(&intTmp, &NRHS, &NEG_CONE, A + (k - 2) * LDA, &intOne,
-                         B + (k - 2), &LDB, B, &LDB);
+                    k -= 1;
+                } else {
+                    kp = -ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    kp = -ipiv[k - 2];
+                    if (kp != k - 1) {
+                        SWAP_(&length, B + (k - 2) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    if (k > 2) {
+                        intTmp = k - 2;
+                        GER_(&intTmp, &length, &NEG_CONE, A + (k - 1) * LDA,
+                             &intOne, B + (k - 1) + i * step * LDB, &LDB,
+                             B + i * step * LDB, &LDB);
+                        GER_(&intTmp, &length, &NEG_CONE, A + (k - 2) * LDA,
+                             &intOne, B + (k - 2) + i * step * LDB, &LDB,
+                             B + i * step * LDB, &LDB);
+                    }
+                    akm1k = A[k - 2 + (k - 1) * (LDA)];
+                    akm1 = A[k - 2 + (k - 2) * (LDA)] / akm1k;
+                    ak = A[k - 1 + (k - 1) * (LDA)] / akm1k;
+                    deNom = akm1 * ak - CONE;
+                    for (j = i * step; j < i * step + length; j++) {
+                        bkm1 = B[k - 2 + j * (LDB)] / akm1k;
+                        bk = B[k - 1 + j * (LDB)] / akm1k;
+                        B[k - 2 + j * (LDB)] = (bkm1 * ak - bk) / deNom;
+                        B[k - 1 + j * (LDB)] = (akm1 * bk - bkm1) / deNom;
+                    }
+                    k -= 2;
                 }
-
-                akm1k = A[k - 2 + (k - 1) * (LDA)];
-                akm1 = A[k - 2 + (k - 2) * (LDA)] / akm1k;
-                ak = A[k - 1 + (k - 1) * (LDA)] / akm1k;
-                deNom = akm1 * ak - CONE;
-                for (j = 1; j <= NRHS; j++) {
-                    bkm1 = B[k - 2 + (j - 1) * (LDB)] / akm1k;
-                    bk = B[k - 1 + (j - 1) * (LDB)] / akm1k;
-                    B[k - 2 + (j - 1) * (LDB)] = (bkm1 * ak - bk) / deNom;
-                    B[k - 1 + (j - 1) * (LDB)] = (akm1 * bk - bkm1) / deNom;
-                }
-                k -= 2;
             }
         }
-
-        k = 1;
-
-        while (k <= N) {
-            if (ipiv[k - 1] > 0) {
-                if (k > 1) {
-                    intTmp = k - 1;
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
-                          A + (k - 1) * LDA, &intOne, &CONE, B + k - 1, &LDB);
-                }
-
-                kp = ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-                k += 1;
+        gettimeofday(&tvEnd, &tzEnd);
+        printf("TRS(1) = %lf s + %lf us\n",
+               (double)(tvEnd.tv_sec - tvStart.tv_sec),
+               (double)(tvEnd.tv_usec - tvStart.tv_usec));
+        gettimeofday(&tvStart, &tzStart);
+#pragma omp parallel for private(i, kp, intTmp, length, k)
+        for (i = 0; i < numThread; i++) {
+            k = 1;
+            if (i < numThread - 1) {
+                length = step;
             } else {
-                if (k > 1) {
-                    intTmp = k - 1;
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB,
-                          A + (k - 1) * LDA, &intOne, &CONE, B + k - 1, &LDB);
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B, &LDB, A + k * LDA,
-                          &intOne, &CONE, B + k, &LDB);
-                }
+                length = NRHS - last;
+            }
+            while (k <= N) {
+                if (ipiv[k - 1] > 0) {
+                    if (k > 1) {
+                        intTmp = k - 1;
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + i * step * LDB, &LDB, A + (k - 1) * LDA,
+                              &intOne, &CONE, B + k - 1 + i * step * LDB, &LDB);
+                    }
 
-                kp = -ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
+                    kp = ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    k += 1;
+                } else {
+                    if (k > 1) {
+                        intTmp = k - 1;
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + i * step * LDB, &LDB, A + (k - 1) * LDA,
+                              &intOne, &CONE, B + k - 1 + i * step * LDB, &LDB);
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + i * step * LDB, &LDB, A + k * LDA, &intOne,
+                              &CONE, B + k + i * step * LDB, &LDB);
+                    }
+
+                    kp = -ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    kp = -ipiv[k];
+                    if (kp != k + 1) {
+                        SWAP_(&length, B + k + i * step * LDB, &LDB,
+                              B + kp - 1 + i * step * LDB, &LDB);
+                    }
+                    k += 2;
                 }
-                kp = -ipiv[k];
-                if (kp != k + 1) {
-                    SWAP_(&NRHS, B + k, &LDB, B + kp - 1, &LDB);
-                }
-                k += 2;
             }
         }
+        gettimeofday(&tvEnd, &tzEnd);
+        printf("TRS(2) = %lf s + %lf us\n",
+               (double)(tvEnd.tv_sec - tvStart.tv_sec),
+               (double)(tvEnd.tv_usec - tvStart.tv_usec));
     } else {
-        k = 1;
-        while (k <= N) {
-            if (ipiv[k - 1] > 0) {
-                kp = ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-
-                if (k < N) {
-                    intTmp = N - k;
-                    GER_(&intTmp, &NRHS, &NEG_CONE, A + k + (k - 1) * LDA,
-                         &intOne, B + k - 1, &LDB, B + k, &LDB);
-                }
-
-                dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
-#if defined(COMPLEX) || defined(COMPLEX16)
-                SCAL_(&NRHS, (void*)&ALPHA_, B + k - 1, &LDB);
-#else
-                SCAL_(&NRHS, &ALPHA_, B + k - 1, &LDB);
-#endif
-                k += 1;
+#pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
+                                 intTmp, length, k)
+        for (i = 0; i < numThread; i++) {
+            if (i < numThread - 1) {
+                length = step;
             } else {
-                kp = -ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-                kp = -ipiv[k];
-                if (kp != k + 1) {
-                    SWAP_(&NRHS, B + k, &LDB, B + kp - 1, &LDB);
-                }
+                length = NRHS - last;
+            }
+            k = 1;
+            while (k <= N) {
+                if (ipiv[k - 1] > 0) {
+                    kp = ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
 
-                if (k < N - 1) {
-                    intTmp = N - k - 1;
-                    GER_(&intTmp, &NRHS, &NEG_CONE, A + k + 1 + (k - 1) * LDA,
-                         &intOne, B + k - 1, &LDB, B + k + 1, &LDB);
-                    GER_(&intTmp, &NRHS, &NEG_CONE, A + k + 1 + k * LDA,
-                         &intOne, B + k, &LDB, B + k + 1, &LDB);
-                }
+                    if (k < N) {
+                        intTmp = N - k;
+                        GER_(&intTmp, &length, &NEG_CONE, A + k + (k - 1) * LDA,
+                             &intOne, B + k - 1 + i * step * LDB, &LDB,
+                             B + k + i * step * LDB, &LDB);
+                    }
 
-                akm1k = A[k + (k - 1) * (LDA)];
-                akm1 = A[k - 1 + (k - 1) * (LDA)] / akm1k;
-                ak = A[k + k * (LDA)] / akm1k;
-                deNom = akm1 * ak - T_ONE;
-                for (j = 1; j <= NRHS; j++) {
-                    bkm1 = B[k - 1 + (j - 1) * (LDB)] / akm1k;
-                    bk = B[k + (j - 1) * (LDB)] / akm1k;
-                    B[k - 1 + (j - 1) * (LDB)] = (bkm1 * ak - bk) / deNom;
-                    B[k + (j - 1) * (LDB)] = (bk * akm1 - bkm1) / deNom;
+                    dataType ALPHA_ = T_ONE / A[k - 1 + (k - 1) * (LDA)];
+#if defined(COMPLEX) || defined(COMPLEX16)
+                    SCAL_(&length, (void*)&ALPHA_, B + k - 1 + i * step * LDB,
+                          &LDB);
+#else
+                    SCAL_(&length, &ALPHA_, B + k - 1 + i * step * LDB, &LDB);
+#endif
+                    k += 1;
+                } else {
+                    kp = -ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    kp = -ipiv[k];
+                    if (kp != k + 1) {
+                        SWAP_(&length, B + k + i * step * LDB, &LDB,
+                              B + kp - 1 + i * step * LDB, &LDB);
+                    }
+
+                    if (k < N - 1) {
+                        intTmp = N - k - 1;
+                        GER_(&intTmp, &length, &NEG_CONE,
+                             A + k + 1 + (k - 1) * LDA, &intOne,
+                             B + k - 1 + i * step * LDB, &LDB,
+                             B + k + 1 + i * step * LDB, &LDB);
+                        GER_(&intTmp, &length, &NEG_CONE, A + k + 1 + k * LDA,
+                             &intOne, B + k + i * step * LDB, &LDB,
+                             B + k + 1 + i * step * LDB, &LDB);
+                    }
+
+                    akm1k = A[k + (k - 1) * (LDA)];
+                    akm1 = A[k - 1 + (k - 1) * (LDA)] / akm1k;
+                    ak = A[k + k * (LDA)] / akm1k;
+                    deNom = akm1 * ak - T_ONE;
+                    for (j = i * step; j < i * step + length; j++) {
+                        bkm1 = B[k - 1 + j * (LDB)] / akm1k;
+                        bk = B[k + j * (LDB)] / akm1k;
+                        B[k - 1 + j * (LDB)] = (bkm1 * ak - bk) / deNom;
+                        B[k + j * (LDB)] = (bk * akm1 - bkm1) / deNom;
+                    }
+                    k += 2;
                 }
-                k += 2;
             }
         }
-
-        k = N;
-
-        while (k > 0) {
-            if (ipiv[k - 1] > 0) {
-                if (k < N) {
-                    intTmp = N - k;
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
-                          A + k + (k - 1) * LDA, &intOne, &CONE, B + k - 1,
-                          &LDB);
-                }
-
-                kp = ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-                k -= 1;
+#pragma omp parallel for private(i, kp, intTmp, length, k)
+        for (i = 0; i < numThread; i++) {
+            if (i < numThread - 1) {
+                length = step;
             } else {
-                if (k < N) {
-                    intTmp = N - k;
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
-                          A + k + (k - 1) * LDA, &intOne, &CONE, B + k - 1,
-                          &LDB);
-                    GEMV_("T", &intTmp, &NRHS, &NEG_CONE, B + k, &LDB,
-                          A + k + (k - 2) * LDA, &intOne, &CONE, B + k - 2,
-                          &LDB);
+                length = NRHS - last;
+            }
+            k = N;
+            while (k > 0) {
+                if (ipiv[k - 1] > 0) {
+                    if (k < N) {
+                        intTmp = N - k;
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + k + i * step * LDB, &LDB,
+                              A + k + (k - 1) * LDA, &intOne, &CONE,
+                              B + k - 1 + i * step * LDB, &LDB);
+                    }
+
+                    kp = ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    k -= 1;
+                } else {
+                    if (k < N) {
+                        intTmp = N - k;
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + k + i * step * LDB, &LDB,
+                              A + k + (k - 1) * LDA, &intOne, &CONE,
+                              B + k - 1 + i * step * LDB, &LDB);
+                        GEMV_("T", &intTmp, &length, &NEG_CONE,
+                              B + k + i * step * LDB, &LDB,
+                              A + k + (k - 2) * LDA, &intOne, &CONE,
+                              B + k - 2 + i * step * LDB, &LDB);
+                    }
+                    kp = -ipiv[k - 1];
+                    if (kp != k) {
+                        SWAP_(&length, B + (k - 1) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    kp = -ipiv[k - 2];
+                    if (kp != k - 1) {
+                        SWAP_(&length, B + (k - 2) + i * step * LDB, &LDB,
+                              B + (kp - 1) + i * step * LDB, &LDB);
+                    }
+                    k -= 2;
                 }
-                kp = -ipiv[k - 1];
-                if (kp != k) {
-                    SWAP_(&NRHS, B + (k - 1), &LDB, B + (kp - 1), &LDB);
-                }
-                kp = -ipiv[k - 2];
-                if (kp != k - 1) {
-                    SWAP_(&NRHS, B + (k - 2), &LDB, B + (kp - 1), &LDB);
-                }
-                k -= 2;
             }
         }
     }
