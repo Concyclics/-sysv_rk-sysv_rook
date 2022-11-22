@@ -30,8 +30,17 @@ void SYTRS_ROOK(const char* uplo,
     int i, j, k, kp;
     dataType ak, akm1, akm1k, bk, bkm1, deNom;
 
-    int numThread = 32;
-    int step = NRHS / numThread;
+    int step = 32 / sizeof(dataType);
+#if defined COMPLEX16
+    if (N < 18000) {
+        step *= 2;
+    }
+#endif
+    int numThread = NRHS / step;
+    if (numThread == 0) {
+        step = 0;
+        numThread = 1;
+    }
     int last = (numThread - 1) * step;
     int length;
 
