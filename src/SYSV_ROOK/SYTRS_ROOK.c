@@ -5,8 +5,7 @@
  * Create: 2022-06-27
  *******************************************************************************/
 #include "SYTRS_ROOK.h"
-#include <stdio.h>
-#include <sys/time.h>
+
 void SYTRS_ROOK(const char* uplo,
                 const int* n,
                 const int* nrhs,
@@ -82,7 +81,6 @@ void SYTRS_ROOK(const char* uplo,
     }
 
     if (upper) {
-        gettimeofday(&tvStart, &tzStart);
 #pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
                                  intTmp, length, k)
         for (i = 0; i < numThread; i++) {
@@ -146,11 +144,16 @@ void SYTRS_ROOK(const char* uplo,
                 }
             }
         }
-        gettimeofday(&tvEnd, &tzEnd);
-        printf("TRS(1) = %lf s + %lf us\n",
-               (double)(tvEnd.tv_sec - tvStart.tv_sec),
-               (double)(tvEnd.tv_usec - tvStart.tv_usec));
-        gettimeofday(&tvStart, &tzStart);
+
+        if (omp_get_max_threads() == 1) {
+            step = NRHS;
+            numThread = NRHS / step;
+            if (numThread == 0) {
+                step = 0;
+                numThread = 1;
+            }
+            last = (numThread - 1) * step;
+        }
 #pragma omp parallel for private(i, kp, intTmp, length, k)
         for (i = 0; i < numThread; i++) {
             k = 1;
@@ -199,10 +202,7 @@ void SYTRS_ROOK(const char* uplo,
                 }
             }
         }
-        gettimeofday(&tvEnd, &tzEnd);
-        printf("TRS(2) = %lf s + %lf us\n",
-               (double)(tvEnd.tv_sec - tvStart.tv_sec),
-               (double)(tvEnd.tv_usec - tvStart.tv_usec));
+
     } else {
 #pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
                                  intTmp, length, k)
@@ -272,6 +272,16 @@ void SYTRS_ROOK(const char* uplo,
                     k += 2;
                 }
             }
+        }
+
+         if (omp_get_max_threads() == 1) {
+            step = NRHS;
+            numThread = NRHS / step;
+            if (numThread == 0) {
+                step = 0;
+                numThread = 1;
+            }
+            last = (numThread - 1) * step;
         }
 #pragma omp parallel for private(i, kp, intTmp, length, k)
         for (i = 0; i < numThread; i++) {
