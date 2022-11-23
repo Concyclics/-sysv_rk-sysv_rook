@@ -5,7 +5,7 @@ bash build.sh 2
 bash build_test.sh
 
 export ASAN_OPTIONS=log_path=./asan.log:detect_leaks=1
-export OMP_NUM_THREADS=32
+export OMP_NUM_THREADS=48
 #export LD_PRELOAD=/usr/lib/gcc/aarch64-linux-gnu/10.3.1/libasan.so
 
 echo "Running functional tests"
