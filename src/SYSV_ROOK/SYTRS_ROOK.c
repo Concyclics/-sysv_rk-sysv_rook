@@ -19,8 +19,6 @@ void SYTRS_ROOK(const char* uplo,
     const dataType NEG_CONE = -1;
     const int intOne = 1;
     int intTmp;
-    struct timeval tvStart, tvEnd;
-    struct timezone tzStart, tzEnd;
     const int N = *n;
     const int NRHS = *nrhs;
     const int LDA = *lda;
