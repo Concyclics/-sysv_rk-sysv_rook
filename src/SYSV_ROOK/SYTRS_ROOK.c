@@ -143,15 +143,6 @@ void SYTRS_ROOK(const char* uplo,
             }
         }
 
-        if (omp_get_max_threads() == 1) {
-            step = NRHS;
-            numThread = NRHS / step;
-            if (numThread == 0) {
-                step = 0;
-                numThread = 1;
-            }
-            last = (numThread - 1) * step;
-        }
 #pragma omp parallel for private(i, kp, intTmp, length, k)
         for (i = 0; i < numThread; i++) {
             k = 1;
@@ -272,15 +263,6 @@ void SYTRS_ROOK(const char* uplo,
             }
         }
 
-         if (omp_get_max_threads() == 1) {
-            step = NRHS;
-            numThread = NRHS / step;
-            if (numThread == 0) {
-                step = 0;
-                numThread = 1;
-            }
-            last = (numThread - 1) * step;
-        }
 #pragma omp parallel for private(i, kp, intTmp, length, k)
         for (i = 0; i < numThread; i++) {
             if (i < numThread - 1) {
