@@ -57,6 +57,12 @@ void SYTRF_RK(const char* uplo,
     } else if (LWORK < 1 && !lQuery) {
         *info = -8;
     }
+                
+    if (*info == 0) {
+      nb = ilaenv(&one1, name, "RK", n, &_one_1, &_one_1, &_one_1);
+      lwkopt = (N)*nb;
+      work[0] = (float)lwkopt;
+    }
 
     if (*info != 0) {
         int negInfo = -*info;
@@ -64,12 +70,6 @@ void SYTRF_RK(const char* uplo,
         return;
     } else if (lQuery) {
         return;
-    }
-
-    if (*info == 0) {
-        nb = ilaenv(&one1, name, "RK", n, &_one_1, &_one_1, &_one_1);
-        lwkopt = (N)*nb;
-        work[0] = (float)lwkopt;
     }
 
     if (N == 0) {

@@ -41,6 +41,12 @@ void SYTRF_ROOK(const char* uplo,
     } else if (LWORK < 1 && !lQuery) {
         *info = -7;
     }
+    
+    if (*info == 0) {
+        nb = ilaenv(&one1, "SYTRF_ROOK", uplo, n, &_one_1, &_one_1, &_one_1);
+        lwkopt = MAX(1, (N)*nb);
+        work[0] = (float)lwkopt;
+    }
 
     if (*info != 0) {
         int neg_info = -*info;
@@ -59,12 +65,6 @@ void SYTRF_ROOK(const char* uplo,
         return;
     } else if (lQuery) {
         return;
-    }
-
-    if (*info == 0) {
-        nb = ilaenv(&one1, "SYTRF_ROOK", uplo, n, &_one_1, &_one_1, &_one_1);
-        lwkopt = MAX(1, (N)*nb);
-        work[0] = (float)lwkopt;
     }
 
     if (N == 0) {
