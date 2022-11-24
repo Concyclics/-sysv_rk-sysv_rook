@@ -80,7 +80,7 @@ void SYTRS_ROOK(const char* uplo,
 
     if (upper) {
 #pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
-                                 intTmp, length, k)
+                                 intTmp, length, k, j)
         for (i = 0; i < numThread; i++) {
             k = N;
             if (i < numThread - 1) {
@@ -194,7 +194,7 @@ void SYTRS_ROOK(const char* uplo,
 
     } else {
 #pragma omp parallel for private(i, kp, akm1k, akm1, ak, deNom, bkm1, bk, \
-                                 intTmp, length, k)
+                                 intTmp, length, k, j)
         for (i = 0; i < numThread; i++) {
             if (i < numThread - 1) {
                 length = step;
