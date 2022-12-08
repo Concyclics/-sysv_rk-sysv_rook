@@ -20,6 +20,7 @@ void SYTRS_3(const char* uplo,
     const dataType CONE = 1;
     const dataType NEG_CONE = -1;
 
+    const int maxThreads = omp_get_max_threads();
     const int N = *n;
     const int NRHS = *nrhs;
     const int LDA = *lda;
@@ -70,41 +71,49 @@ void SYTRS_3(const char* uplo,
         return;
     }
     if (upper) {
-        for (k = 0; k < N; k++) {
-            swaped[k] = k;
-            visited[k] = 0;
-        }
-        for (k = N - 1; k > 0; k--) {
-            kp = ABS_(ipiv[k]);
-            kp--;
-            if (kp != k) {
-                int tmp = swaped[k];
-                swaped[k] = swaped[kp];
-                swaped[kp] = tmp;
-                visited[k] = 1;
-                visited[kp] = 1;
+        if (maxThreads == 1 && N < 1000) {
+            for (k = N; k > 0; k--) {
+                kp = ABS_(ipiv[k - 1]);
+                if (kp != k) {
+                    SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
+                }
             }
-        }
+        } else {
+            for (k = 0; k < N; k++) {
+                swaped[k] = k;
+                visited[k] = 0;
+            }
+            for (k = N - 1; k > 0; k--) {
+                kp = ABS_(ipiv[k]);
+                kp--;
+                if (kp != k) {
+                    int tmp = swaped[k];
+                    swaped[k] = swaped[kp];
+                    swaped[kp] = tmp;
+                    visited[k] = 1;
+                    visited[kp] = 1;
+                }
+            }
 
-        cnt = 0;
-        for (k = 0; k < N; k++) {
-            if (visited[k] == 1) {
-                index[cnt] = k;
-                cnt++;
+            cnt = 0;
+            for (k = 0; k < N; k++) {
+                if (visited[k] == 1) {
+                    index[cnt] = k;
+                    cnt++;
+                }
             }
-        }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < NRHS; k++) {
-            dataType Btmp[cnt];
-            for (i = 0; i < cnt; i++) {
-                Btmp[i] = B[swaped[index[i]] + LDB * k];
-            }
-            for (i = 0; i < cnt; i++) {
-                B[index[i] + LDB * k] = Btmp[i];
+            for (k = 0; k < NRHS; k++) {
+                dataType Btmp[cnt];
+                for (i = 0; i < cnt; i++) {
+                    Btmp[i] = B[swaped[index[i]] + LDB * k];
+                }
+                for (i = 0; i < cnt; i++) {
+                    B[index[i] + LDB * k] = Btmp[i];
+                }
             }
         }
-
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "U", "N", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
@@ -158,79 +167,95 @@ void SYTRS_3(const char* uplo,
 #else
         TRSM_("L", "U", "T", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        for (k = 0; k < N; k++) {
-            swaped[k] = k;
-            visited[k] = 0;
-        }
-
-        for (k = 0; k < N; k++) {
-            kp = ABS_(ipiv[k]);
-            kp--;
-            if (kp != k) {
-                int tmp = swaped[k];
-                swaped[k] = swaped[kp];
-                swaped[kp] = tmp;
-                visited[k] = 1;
-                visited[kp] = 1;
+        if (maxThreads == 1 && N < 1000) {
+            for (k = 1; k <= N; k++) {
+                kp = ABS_(ipiv[k - 1]);
+                if (kp != k) {
+                    SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
+                }
             }
-        }
-
-        cnt = 0;
-        for (k = 0; k < N; k++) {
-            if (visited[k] == 1) {
-                index[cnt] = k;
-                cnt++;
+        } else {
+            for (k = 0; k < N; k++) {
+                swaped[k] = k;
+                visited[k] = 0;
             }
-        }
+
+            for (k = 0; k < N; k++) {
+                kp = ABS_(ipiv[k]);
+                kp--;
+                if (kp != k) {
+                    int tmp = swaped[k];
+                    swaped[k] = swaped[kp];
+                    swaped[kp] = tmp;
+                    visited[k] = 1;
+                    visited[kp] = 1;
+                }
+            }
+
+            cnt = 0;
+            for (k = 0; k < N; k++) {
+                if (visited[k] == 1) {
+                    index[cnt] = k;
+                    cnt++;
+                }
+            }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < NRHS; k++) {
-            dataType Btmp[cnt];
-            for (i = 0; i < cnt; i++) {
-                Btmp[i] = B[swaped[index[i]] + k * LDB];
-            }
-            for (i = 0; i < cnt; i++) {
-                B[index[i] + k * LDB] = Btmp[i];
+            for (k = 0; k < NRHS; k++) {
+                dataType Btmp[cnt];
+                for (i = 0; i < cnt; i++) {
+                    Btmp[i] = B[swaped[index[i]] + k * LDB];
+                }
+                for (i = 0; i < cnt; i++) {
+                    B[index[i] + k * LDB] = Btmp[i];
+                }
             }
         }
-
     } else {
-        for (k = 0; k < N; k++) {
-            swaped[k] = k;
-            visited[k] = 0;
-        }
-
-        for (k = 0; k < N; k++) {
-            kp = ABS_(ipiv[k]);
-            kp--;
-            if (kp != k) {
-                int tmp = swaped[k];
-                swaped[k] = swaped[kp];
-                swaped[kp] = tmp;
-                visited[k] = 1;
-                visited[kp] = 1;
+        if (maxThreads == 1 && N < 1000) {
+            for (k = 1; k <= N; k++) {
+                kp = ABS_(ipiv[k - 1]);
+                if (kp != k) {
+                    SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
+                }
             }
-        }
-
-        cnt = 0;
-        for (k = 0; k < N; k++) {
-            if (visited[k] == 1) {
-                index[cnt] = k;
-                cnt++;
+        } else {
+            for (k = 0; k < N; k++) {
+                swaped[k] = k;
+                visited[k] = 0;
             }
-        }
+
+            for (k = 0; k < N; k++) {
+                kp = ABS_(ipiv[k]);
+                kp--;
+                if (kp != k) {
+                    int tmp = swaped[k];
+                    swaped[k] = swaped[kp];
+                    swaped[kp] = tmp;
+                    visited[k] = 1;
+                    visited[kp] = 1;
+                }
+            }
+
+            cnt = 0;
+            for (k = 0; k < N; k++) {
+                if (visited[k] == 1) {
+                    index[cnt] = k;
+                    cnt++;
+                }
+            }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < NRHS; k++) {
-            dataType Btmp[cnt];
-            for (i = 0; i < cnt; i++) {
-                Btmp[i] = B[swaped[index[i]] + k * LDB];
-            }
-            for (i = 0; i < cnt; i++) {
-                B[index[i] + k * LDB] = Btmp[i];
+            for (k = 0; k < NRHS; k++) {
+                dataType Btmp[cnt];
+                for (i = 0; i < cnt; i++) {
+                    Btmp[i] = B[swaped[index[i]] + k * LDB];
+                }
+                for (i = 0; i < cnt; i++) {
+                    B[index[i] + k * LDB] = Btmp[i];
+                }
             }
         }
-
 #if defined(COMPLEX) || defined(COMPLEX16)
         TRSM_("L", "L", "N", "U", &N, &NRHS, (void*)&CONE, A, &LDA, B, &LDB);
 #else
@@ -282,39 +307,48 @@ void SYTRS_3(const char* uplo,
 #else
         TRSM_("L", "L", "T", "U", &N, &NRHS, &CONE, A, &LDA, B, &LDB);
 #endif
-        for (k = 0; k < N; k++) {
-            swaped[k] = k;
-            visited[k] = 0;
-        }
-
-        for (k = N - 1; k >= 0; k--) {
-            kp = ABS_(ipiv[k]);
-            kp--;
-            if (kp != k) {
-                int tmp = swaped[k];
-                swaped[k] = swaped[kp];
-                swaped[kp] = tmp;
-                visited[k] = 1;
-                visited[kp] = 1;
+        if (maxThreads == 1 && N < 1000) {
+            for (k = N; k >= 1; k--) {
+                kp = ABS_(ipiv[k - 1]);
+                if (kp != k) {
+                    SWAP_(&NRHS, B + k - 1, &LDB, B + kp - 1, &LDB);
+                }
             }
-        }
-
-        cnt = 0;
-        for (k = 0; k < N; k++) {
-            if (visited[k] == 1) {
-                index[cnt] = k;
-                cnt++;
+        } else {
+            for (k = 0; k < N; k++) {
+                swaped[k] = k;
+                visited[k] = 0;
             }
-        }
+
+            for (k = N - 1; k >= 0; k--) {
+                kp = ABS_(ipiv[k]);
+                kp--;
+                if (kp != k) {
+                    int tmp = swaped[k];
+                    swaped[k] = swaped[kp];
+                    swaped[kp] = tmp;
+                    visited[k] = 1;
+                    visited[kp] = 1;
+                }
+            }
+
+            cnt = 0;
+            for (k = 0; k < N; k++) {
+                if (visited[k] == 1) {
+                    index[cnt] = k;
+                    cnt++;
+                }
+            }
 
 #pragma omp parallel for private(k, i)
-        for (k = 0; k < NRHS; k++) {
-            dataType Btmp[cnt];
-            for (i = 0; i < cnt; i++) {
-                Btmp[i] = B[swaped[index[i]] + k * LDB];
-            }
-            for (i = 0; i < cnt; i++) {
-                B[index[i] + k * LDB] = Btmp[i];
+            for (k = 0; k < NRHS; k++) {
+                dataType Btmp[cnt];
+                for (i = 0; i < cnt; i++) {
+                    Btmp[i] = B[swaped[index[i]] + k * LDB];
+                }
+                for (i = 0; i < cnt; i++) {
+                    B[index[i] + k * LDB] = Btmp[i];
+                }
             }
         }
     }
