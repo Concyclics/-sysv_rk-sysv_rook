@@ -439,20 +439,22 @@ void LASYF_RK(const char* uplo,
         {
             for (j = k; j <= N; j += NB) {
 #pragma omp task firstprivate(j) private(jj, jb, intTmp, Tmp2)
-                jb = MIN(NB, N - j + 1);
-                for (jj = j; jj <= j + jb - 1; jj++) {
-                    intTmp = j + jb - jj;
-                    Tmp2 = k - 1;
-                    GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + jj - 1, &LDA,
-                          w + jj - 1, &LDW, &CONE, a + jj - 1 + (jj - 1) * LDA,
-                          &intOne);
-                }
-                if (j + jb <= N) {
-                    intTmp = N - j - jb + 1;
-                    Tmp2 = k - 1;
-                    GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE,
-                          a + j + jb - 1, &LDA, w + j - 1, &LDW, &CONE,
-                          a + j + jb - 1 + (j - 1) * LDA, &LDA);
+                {
+                    jb = MIN(NB, N - j + 1);
+                    for (jj = j; jj <= j + jb - 1; jj++) {
+                        intTmp = j + jb - jj;
+                        Tmp2 = k - 1;
+                        GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + jj - 1, &LDA,
+                              w + jj - 1, &LDW, &CONE,
+                              a + jj - 1 + (jj - 1) * LDA, &intOne);
+                    }
+                    if (j + jb <= N) {
+                        intTmp = N - j - jb + 1;
+                        Tmp2 = k - 1;
+                        GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE,
+                              a + j + jb - 1, &LDA, w + j - 1, &LDW, &CONE,
+                              a + j + jb - 1 + (j - 1) * LDA, &LDA);
+                    }
                 }
             }
         }
