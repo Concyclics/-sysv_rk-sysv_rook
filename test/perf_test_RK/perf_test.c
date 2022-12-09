@@ -23,7 +23,7 @@ double calGflops(int n, int m, char UPLO) {
     if (((A = (dataType*)malloc(sizeof(dataType) * N * N)) == NULL) ||
         ((E = (dataType*)malloc(sizeof(dataType) * N)) == NULL) ||
         ((B = (dataType*)malloc(sizeof(dataType) * N * M)) == NULL) ||
-        ((W = (dataType*)malloc(sizeof(dataType) * N * N)) == NULL) ||
+        ((W = (dataType*)malloc(sizeof(dataType) * mult * N)) == NULL) ||
         ((ipiv = (int*)malloc(sizeof(int) * N)) == NULL)) {
         printf("malloc error!\n");
         return -1;
