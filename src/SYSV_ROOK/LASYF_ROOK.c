@@ -67,7 +67,6 @@ void LASYF_ROOK(const char* uplo,
                 COPY_(&k, w + (kw - 1) * LDW, &intOne, a + (k - 1) * LDA,
                       &intOne);
             } else {
-
                 if (absAKK >= ALPHA * colMax) {
                     kp = k;
                 } else {
@@ -111,10 +110,7 @@ void LASYF_ROOK(const char* uplo,
                             COPY_(&k, w + (kw - 2) * LDW, &intOne,
                                   w + (kw - 1) * LDW, &intOne);
                             flag = 0;
-                        } else if ((p == jMax) ||
-                                   (rowMax <=
-                                    colMax))
-                        {
+                        } else if ((p == jMax) || (rowMax <= colMax)) {
                             kp = iMax;
                             kStep = 2;
                             flag = 0;
@@ -182,7 +178,6 @@ void LASYF_ROOK(const char* uplo,
                         }
                     }
                 } else {
-
                     if (k > 2) {
                         d12 = w[k - 2 + (kw - 1) * LDW];
                         d11 = w[k - 1 + (kw - 1) * LDW] / d12;
@@ -215,22 +210,28 @@ void LASYF_ROOK(const char* uplo,
             k -= kStep;
         }
 
-#pragma omp parallel for private(j, jj, jb, intTmp, Tmp2)
-        for (j = ((k - 1) / NB) * NB + 1; j >= 1; j -= NB) {
-            jb = MIN(NB, k - j + 1);
-            for (jj = j; jj <= j + jb - 1; jj++) {
-                intTmp = jj - j + 1;
-                Tmp2 = N - k;
-                GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + j - 1 + k * LDA, &LDA,
-                      w + jj - 1 + kw * LDW, &LDW, &CONE,
-                      a + j - 1 + (jj - 1) * LDA, &intOne);
-            }
-            if (j >= 2) {
-                intTmp = j - 1;
-                Tmp2 = N - k;
-                GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE, a + k * LDA,
-                      &LDA, w + j - 1 + kw * LDW, &LDW, &CONE,
-                      a + (j - 1) * LDA, &LDA);
+#pragma omp parallel
+#pragma omp master
+        {
+            for (j = ((k - 1) / NB) * NB + 1; j >= 1; j -= NB) {
+#pragma omp task firstprivate(j) private(jj, jb, intTmp, Tmp2)
+                {
+                    jb = MIN(NB, k - j + 1);
+                    for (jj = j; jj <= j + jb - 1; jj++) {
+                        intTmp = jj - j + 1;
+                        Tmp2 = N - k;
+                        GEMV_("N", &intTmp, &Tmp2, &NEG_CONE,
+                              a + j - 1 + k * LDA, &LDA, w + jj - 1 + kw * LDW,
+                              &LDW, &CONE, a + j - 1 + (jj - 1) * LDA, &intOne);
+                    }
+                    if (j >= 2) {
+                        intTmp = j - 1;
+                        Tmp2 = N - k;
+                        GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE,
+                              a + k * LDA, &LDA, w + j - 1 + kw * LDW, &LDW,
+                              &CONE, a + (j - 1) * LDA, &LDA);
+                    }
+                }
             }
         }
 
@@ -335,7 +336,6 @@ void LASYF_ROOK(const char* uplo,
                             }
                         }
                         if (ABS_(w[iMax - 1 + k * LDW]) >= ALPHA * rowMax) {
-
                             kp = iMax;
 
                             intTmp = N - k + 1;
@@ -434,22 +434,29 @@ void LASYF_ROOK(const char* uplo,
             }
             k += kStep;
         }
-#pragma omp parallel for private(j, jj, jb, intTmp, Tmp2)
-        for (j = k; j <= N; j += NB) {
-            jb = MIN(NB, N - j + 1);
-            for (jj = j; jj <= j + jb - 1; jj++) {
-                intTmp = j + jb - jj;
-                Tmp2 = k - 1;
-                GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + jj - 1, &LDA,
-                      w + jj - 1, &LDW, &CONE, a + jj - 1 + (jj - 1) * LDA,
-                      &intOne);
-            }
-            if (j + jb <= N) {
-                intTmp = N - j - jb + 1;
-                Tmp2 = k - 1;
-                GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE, a + j + jb - 1,
-                      &LDA, w + j - 1, &LDW, &CONE,
-                      a + j + jb - 1 + (j - 1) * LDA, &LDA);
+
+#pragma omp parallel
+#pragma omp master
+        {
+            for (j = k; j <= N; j += NB) {
+#pragma omp task firstprivate(j) private(jj, jb, intTmp, Tmp2)
+                {
+                    jb = MIN(NB, N - j + 1);
+                    for (jj = j; jj <= j + jb - 1; jj++) {
+                        intTmp = j + jb - jj;
+                        Tmp2 = k - 1;
+                        GEMV_("N", &intTmp, &Tmp2, &NEG_CONE, a + jj - 1, &LDA,
+                              w + jj - 1, &LDW, &CONE,
+                              a + jj - 1 + (jj - 1) * LDA, &intOne);
+                    }
+                    if (j + jb <= N) {
+                        intTmp = N - j - jb + 1;
+                        Tmp2 = k - 1;
+                        GEMM_("N", "T", &intTmp, &jb, &Tmp2, &NEG_CONE,
+                              a + j + jb - 1, &LDA, w + j - 1, &LDW, &CONE,
+                              a + j + jb - 1 + (j - 1) * LDA, &LDA);
+                    }
+                }
             }
         }
         j = k - 1;
